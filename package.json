@@ -1,7 +1,7 @@
 {
   "name": "zlCart",
   "private": false,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Really simple shopping cart for AngularJS",
   "license": "MIT",
   "tags": "AngularJS, directive, module, shopping cart, shopping basket",
