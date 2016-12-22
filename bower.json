@@ -4,7 +4,7 @@
   "keywords": ["AngularJS", "module", "directive", "shopping cart", "e-commerce", "cart", "basket", "shopping"],
   "authors": [],
   "version": "1.0.0",
-  "homepage": "http://ngcart.snapjay.com",
+  "homepage": "",
   "license": "MIT",
   "main": "dist/zlCart.js",
   "private": false,
