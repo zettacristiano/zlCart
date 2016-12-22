@@ -40,7 +40,7 @@ angular.module('zlCart.fulfilment', [])
   }
 }])
 
-.service('zlCart.fulfilment.meowalet', ['$http', 'zlCart', function ($http, zlCart) {
+.service('zlCart.fulfilment.meowallet', ['$http', 'zlCart', function ($http, zlCart) {
   this.checkout = function (settings) {
     return $http.post(settings.url, {
       data: zlCart.toObject()

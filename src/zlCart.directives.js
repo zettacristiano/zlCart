@@ -128,7 +128,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         fulfilmentProvider.checkout()
           .success(function (data, status, headers, config) {
             if ($scope.service === 'meowallet') {
-              $window.location.href = data.data.url_redirect;
+              $window.location.href = data.url_redirect;
             }
             $rootScope.$broadcast('zlCart:checkout_succeeded', data);
           })
