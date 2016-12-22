@@ -249,8 +249,8 @@ angular.module('zlCart', ['zlCart.directives'])
       }
     } else {
       this._discount = 0;
-      $log.error('A discount must be provided');
     }
+    $rootScope.$broadcast('zlCart:change', {});
   };
   item.prototype.getDiscount = function () {
     return this._discount;
@@ -335,11 +335,11 @@ angular.module('zlCart', ['zlCart.directives'])
     this.urlDiscount = "/api/getdiscount/";
   };
 
-  this.setUrlDiscount = function(url){
+  this.setUrlDiscount = function (url) {
     this.urlDiscount = url;
   };
 
-  this.getUrlDiscount = function(){
+  this.getUrlDiscount = function () {
     return this.urlDiscount;
   };
 
@@ -352,7 +352,6 @@ angular.module('zlCart', ['zlCart.directives'])
           zlCart.getItemById(product._id.toString()).setDiscount(discount.discount);
         }
       });
-      $rootScope.$broadcast('zlCart:change', {});
       deferred.resolve();
     }, function (error) {
       deferred.reject();
@@ -486,7 +485,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
 .directive('zlcartCheckout', [function () {
   return {
     restrict: 'E',
-    controller: ('zlCartController', ['$rootScope', '$scope', 'zlCart', 'fulfilmentProvider', function ($rootScope, $scope, zlCart, fulfilmentProvider) {
+    controller: ('zlCartController', ['$rootScope', '$scope', '$window', 'zlCart', 'fulfilmentProvider', function ($rootScope, $scope, $window, zlCart, fulfilmentProvider) {
       $scope.zlCart = zlCart;
 
       $scope.checkout = function () {
@@ -494,6 +493,9 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         fulfilmentProvider.setSettings($scope.settings);
         fulfilmentProvider.checkout()
           .success(function (data, status, headers, config) {
+            if ($scope.service === 'meowallet') {
+              $window.location.href = data.data.url_redirect;
+            }
             $rootScope.$broadcast('zlCart:checkout_succeeded', data);
           })
           .error(function (data, status, headers, config) {
@@ -562,8 +564,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
 .service('zlCart.fulfilment.meowalet', ['$http', 'zlCart', function ($http, zlCart) {
   this.checkout = function (settings) {
     return $http.post(settings.url, {
-      data: zlCart.toObject(),
-      options: settings.options
+      data: zlCart.toObject()
     });
   }
 }])

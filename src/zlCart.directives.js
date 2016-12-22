@@ -119,7 +119,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
 .directive('zlcartCheckout', [function () {
   return {
     restrict: 'E',
-    controller: ('zlCartController', ['$rootScope', '$scope', 'zlCart', 'fulfilmentProvider', function ($rootScope, $scope, zlCart, fulfilmentProvider) {
+    controller: ('zlCartController', ['$rootScope', '$scope', '$window', 'zlCart', 'fulfilmentProvider', function ($rootScope, $scope, $window, zlCart, fulfilmentProvider) {
       $scope.zlCart = zlCart;
 
       $scope.checkout = function () {
@@ -127,6 +127,9 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         fulfilmentProvider.setSettings($scope.settings);
         fulfilmentProvider.checkout()
           .success(function (data, status, headers, config) {
+            if ($scope.service === 'meowallet') {
+              $window.location.href = data.data.url_redirect;
+            }
             $rootScope.$broadcast('zlCart:checkout_succeeded', data);
           })
           .error(function (data, status, headers, config) {
