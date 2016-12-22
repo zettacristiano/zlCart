@@ -249,8 +249,8 @@ angular.module('zlCart', ['zlCart.directives'])
       }
     } else {
       this._discount = 0;
-      $log.error('A discount must be provided');
     }
+    $rootScope.$broadcast('zlCart:change', {});
   };
   item.prototype.getDiscount = function () {
     return this._discount;
@@ -335,11 +335,11 @@ angular.module('zlCart', ['zlCart.directives'])
     this.urlDiscount = "/api/getdiscount/";
   };
 
-  this.setUrlDiscount = function(url){
+  this.setUrlDiscount = function (url) {
     this.urlDiscount = url;
   };
 
-  this.getUrlDiscount = function(){
+  this.getUrlDiscount = function () {
     return this.urlDiscount;
   };
 
@@ -352,7 +352,6 @@ angular.module('zlCart', ['zlCart.directives'])
           zlCart.getItemById(product._id.toString()).setDiscount(discount.discount);
         }
       });
-      $rootScope.$broadcast('zlCart:change', {});
       deferred.resolve();
     }, function (error) {
       deferred.reject();
