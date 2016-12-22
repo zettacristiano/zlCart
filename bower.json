@@ -1,0 +1,20 @@
+{
+  "name": "zlCart",
+  "description": "Shopping Cart built for AngularJS",
+  "keywords": ["AngularJS", "module", "directive", "shopping cart", "e-commerce", "cart", "basket", "shopping"],
+  "authors": [],
+  "version": "1.0.0",
+  "homepage": "http://ngcart.snapjay.com",
+  "license": "MIT",
+  "main": "dist/zlCart.js",
+  "private": false,
+  "ignore": [
+    ".travis.yml"
+  ],
+  "dependencies": {
+    "angular": ">=1.2.x"
+  },
+  "devDependencies": {
+    "angular-mocks": ">=1.2.x"
+  }
+}
