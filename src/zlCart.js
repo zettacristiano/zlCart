@@ -364,4 +364,4 @@ angular.module('zlCart', ['zlCart.directives'])
   $scope.zlCart = zlCart;
 }])
 
-.value('version', '1.0.0');
+.value('version', '1.0.7');

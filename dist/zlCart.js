@@ -364,7 +364,7 @@ angular.module('zlCart', ['zlCart.directives'])
   $scope.zlCart = zlCart;
 }])
 
-.value('version', '1.0.0');;'use strict';
+.value('version', '1.0.7');;'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
 
@@ -494,7 +494,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         fulfilmentProvider.checkout()
           .success(function (data, status, headers, config) {
             if ($scope.service === 'meowallet') {
-              $window.location.href = data.data.url_redirect;
+              $window.location.href = data.url_redirect;
             }
             $rootScope.$broadcast('zlCart:checkout_succeeded', data);
           })
@@ -561,7 +561,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
   }
 }])
 
-.service('zlCart.fulfilment.meowalet', ['$http', 'zlCart', function ($http, zlCart) {
+.service('zlCart.fulfilment.meowallet', ['$http', 'zlCart', function ($http, zlCart) {
   this.checkout = function (settings) {
     return $http.post(settings.url, {
       data: zlCart.toObject()
