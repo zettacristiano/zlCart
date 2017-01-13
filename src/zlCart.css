@@ -1,7 +1,122 @@
-.zlCart.cart span[ng-click] {
-  cursor: pointer;
+/* SHOPPING CART */
+
+.shopping-cart {
+  background-color: transparent;
 }
 
-.zlCart.cart .fa.disabled {
-  color: #aaa;
+.shopping-cart .shopping-empty {
+  background-color: #fff;
+  padding: 20px 0;
+  font-size: 1.3rem;
+}
+
+.shopping-cart .shopping-empty:before {
+  content: "\f071 ";
+  font-family: FontAwesome;
+}
+
+.cart>tbody>tr>td,
+.cart>thead>tr>th,
+.cart>tfoot>tr>td {
+  padding: 13px 7px;
+}
+
+.cart>tfoot>tr>td.no-border {
+  border-top-color: transparent;
+}
+
+.table-hover>tbody>tr:hover {
+  background-color: rgba(266, 266, 266, 0.5);
+}
+
+.cart .fa {
+  font-size: 85%;
+  vertical-align: baseline;
+}
+
+
+/* SHOPPING CART DISCOUNT*/
+
+.shopping-discount {
+  padding: 15px 0;
+}
+
+
+/* SHOPPING CART MENU */
+
+.shopping-menu {
+  background-color: #e2e2e2;
+  color: #344d60;
+}
+
+.shopping-menu .fa {
+  vertical-align: initial;
+  font-size: 1.3em;
+  padding-right: 3px;
+}
+
+.shopping-menu a {
+  font-style: normal;
+}
+
+.shopping-menu a:focus {
+  color: #344d60;
+}
+
+.shopping-menu a:before {
+  content: "\f291";
+  font-family: FontAwesome;
+}
+
+.shopping-menu .num {
+  font-family: 'Droid Sans Mono', monospace;
+  letter-spacing: -1px;
+}
+
+
+/* SHOPPING ADDCART */
+
+.shopping-addcart {
+  display: inline-block;
+  position: relative;
+}
+
+.shopping-addcart .shopping-additem input,
+.shopping-addcart .shopping-additem a {
+  display: inline-block;
+}
+
+.shopping-addcart .shopping-additem input {
+  border-radius: 3px;
+  border: 1px solid #e2e2e2;
+  padding: 4px;
+}
+
+.shopping-addcart .pluscart {
+  background-color: #e2e2e2;
+  border: 1px solid #4b4b4c;
+  color: #4b4b4c;
+  padding: 4px;
+  border-radius: 2px;
+  width: 50px;
+}
+
+
+/* SHOPPING REMOVE */
+
+.shopping-remove {
+  background-color: #fff;
+  position: absolute;
+  right: 0;
+  padding: 3px 10px;
+  width: 200px;
+  z-index: 999;
+}
+
+.shopping-remove .btn {
+  background-color: #db2424;
+}
+
+.shopping-remove .btn:hover {
+  background-color: #cb1f1f;
 }

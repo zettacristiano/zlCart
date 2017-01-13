@@ -24,7 +24,6 @@ angular.module('zlCart', ['zlCart.directives'])
     this.init = function () {
       this.$cart = {
         shipping: null,
-        tax: [],
         items: []
       };
     };
@@ -63,29 +62,6 @@ angular.module('zlCart', ['zlCart.directives'])
     this.getShipping = function () {
       if (this.getCart().items.length == 0) return 0;
       return this.getCart().shipping;
-    };
-
-    this.getTax = function () {
-      var flags = [];
-      var taxOut = [];
-      angular.forEach(this.getCart().items, function (item) {
-        var taxRate = item.getTax();
-        var taxValue = +parseFloat(item.getTotal() * taxRate).toFixed(2);
-        if (!flags[taxRate]) {
-          flags[taxRate] = true;
-          taxOut.push({
-            rate: taxRate,
-            value: taxValue
-          });
-        } else {
-          for (var x = 0; x < taxOut.length; x++) {
-            if (taxOut.rate !== taxRate) continue;
-            taxOut.value += taxValue;
-          }
-        }
-      });
-
-      return taxOut;
     };
 
     this.setCart = function (cart) {
@@ -187,7 +163,6 @@ angular.module('zlCart', ['zlCart.directives'])
 
       return {
         shipping: this.getShipping(),
-        tax: this.getTax(),
         subTotal: this.getSubTotal(),
         totalCost: this.totalCost(),
         items: items
@@ -198,7 +173,6 @@ angular.module('zlCart', ['zlCart.directives'])
       var _self = this;
       _self.init();
       _self.$cart.shipping = storedCart.shipping;
-      //_self.$cart.tax = storedCart.tax;
 
       angular.forEach(storedCart.items, function (item) {
         _self.$cart.items.push(new zlCartItem(item._id, item._name, item._price, item._tax, item._quantity, item._discount, item._data));
@@ -384,9 +358,7 @@ angular.module('zlCart', ['zlCart.directives'])
       return this.urlDiscount;
     };
 
-    this.setDiscount = function (code) {
-      var deferred = $q.defer();
-
+    this.setDiscount = function (code, callback) {
       var cart = zlCart.getCart();
       $http.post(this.getUrlDiscount() + code, {
         cart: cart
@@ -394,19 +366,18 @@ angular.module('zlCart', ['zlCart.directives'])
         if (response.data) {
           zlCart.$restore(angular.fromJson(response.data));
         }
-        deferred.resolve();
+        callback();
       }, function (error) {
-        deferred.reject('Código não Válido');
+        callback(error);
       })
-      return deferred.promise;
-    }
+    };
   }])
 
   .controller('CartController', ['$scope', 'zlCart', function ($scope, zlCart) {
     $scope.zlCart = zlCart;
   }])
 
-  .value('version', '1.0.8');;'use strict';
+  .value('version', '1.0.9');;'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
 
@@ -492,7 +463,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
     };
   }])
 
-  .directive('zlcartTax', [function () {
+  .directive('zlcartTax', ['zlCart', function (zlCart) {
     return {
       restrict: 'E',
       controller: 'zlCartController',
@@ -505,6 +476,36 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         } else {
           return attrs.templateUrl;
         }
+      },
+      link: function (scope, element, attrs) {
+        var flags = [];
+        var taxOut = [];
+        var total = 0;
+        angular.forEach(zlCart.getCart().items, function (item) {
+          var taxRate = item.getTax();
+          var taxTotal = item.getTotal();
+          var taxValue = +parseFloat(taxTotal / 100 * taxRate).toFixed(2);
+          if (!flags[taxRate]) {
+            flags[taxRate] = true;
+            taxOut.push({
+              rate: taxRate,
+              tax: taxValue,
+              value: taxTotal
+            });
+          } else {
+            for (var x = 0; x < taxOut.length; x++) {
+              if (taxOut[x].rate !== taxRate) continue;
+              taxOut[x].tax += taxValue;
+              taxOut[x].value += taxTotal;
+            }
+          }
+        });
+        taxOut.forEach(function (item) {
+          total += item.value;
+        })
+
+        scope.taxsRate = taxOut;
+        scope.taxTotal = total;
       }
     };
   }])
@@ -525,22 +526,23 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       },
       link: function (scope, element, attrs) {
         scope.attrs = attrs;
-        scope.message = null;
+        scope.message = {};
         scope.$watch('code', function (newValue, oldValue) {
-          if (newValue !== oldValue) scope.message = null;
+          if (newValue !== oldValue) scope.message = {};
         });
         scope.setCodeDiscount = function (code) {
-          zlCartDiscount.setDiscount(code).then(function (success) {
-            scope.message = {
-              success: true,
-              text: 'Código consumido com sucesso.'
-            };
+          zlCartDiscount.setDiscount(code, function (err) {
+            scope.message.msg = true;
+            if (err) {
+              scope.message.success = false;
+              scope.message.text = err.data;
+              return;
+            }
+
+            scope.message.success = true;
+            scope.message.text = 'Código consumido com sucesso.';
+
             scope.code = "";
-          }).catch(function (err) {
-            scope.message = {
-              success: false,
-              text: err
-            };
           });
         };
       }
