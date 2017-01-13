@@ -6,7 +6,7 @@ describe('zlCart module', function() {
 
     describe('value - version', function() {
         it('should return current version', inject(function(version) {
-            expect(version).toEqual('1.0.0');
+            expect(version).toEqual('1.0.8');
         }));
     });
 
@@ -25,8 +25,8 @@ describe('zlCart module', function() {
             var $scope;
             var controller;
 
-            function addItem(id, name, price, quantity, data){
-                $scope.zlCart.addItem(id, name, price, quantity, data);
+            function addItem(id, name, price, tax, quantity, data){
+                $scope.zlCart.addItem(id, name, price, tax, quantity, data);
             }
 
             beforeEach(function() {
@@ -41,7 +41,7 @@ describe('zlCart module', function() {
 
 
             it('should be able to add an item', function() {
-                addItem(1, 'Test Item', 10, 2);
+                addItem(1, 'Test Item', 10, 23, 2);
                 expect($scope.zlCart.getItems().length).toEqual(1);
             });
 
@@ -64,9 +64,9 @@ describe('zlCart module', function() {
 
                     $scope.zlCart.setTaxRate(7.5);
                     $scope.zlCart.setShipping(12.50);
-                    addItem(1, 'Work boots', 189.99, 1);
-                    addItem(2, 'Hockey gloves', 85, 2);
-                    addItem('cpBow', 'Compound bow', 499.95, 1);
+                    addItem(1, 'Work boots', 189.99,23, 1);
+                    addItem(2, 'Hockey gloves', 85,23, 2);
+                    addItem('cpBow', 'Compound bow', 499.95,23, 1);
                 });
 
 

@@ -16,7 +16,7 @@ The version number is determined from the `package.json` file inside the project
 
 Download on Github
 ------------------
-https://github.com/zettacristiano/zlCart.git
+https://github.com/zettacristiano/zl-cart.git
 
 
 

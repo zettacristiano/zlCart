@@ -1,0 +1,51 @@
+<div class="zlCart cart">
+  <div class="alert alert-warning" role="alert" ng-show="zlCart.isEmpty()">
+    Your cart is empty
+  </div>
+  <div class="table-responsive col-lg-12" ng-hide="zlCart.isEmpty()">
+    <table class="table table-striped zlCart cart">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+          <th>Quantity</th>
+          <th>Amount</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tfoot>
+        <tr ng-repeat="tax in zlCart.getTax()">
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>Tax ({{ tax.rate }}%):</td>
+          <td>{{ tax.value | currency }}</td>
+        </tr>
+        <tr ng-show="zlCart.getShipping()">
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>Shipping:</td>
+          <td>{{ zlCart.getShipping() | currency }}</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td>Total:</td>
+          <td>{{ zlCart.totalCost() | currency }}</td>
+        </tr>
+      </tfoot>
+      <tbody>
+        <tr ng-repeat="item in zlCart.getCart().items track by $index">
+          <td><span ng-click="zlCart.removeItemById(item.getId())" class="glyphicon glyphicon-remove"></span></td>
+          <td>{{ item.getName() }}</td>
+          <td><span class="glyphicon glyphicon-minus" ng-class="{'disabled':item.getQuantity()==1}" ng-click="item.setQuantity(-1, true)"></span>&nbsp;&nbsp; {{ item.getQuantity() | number }}&nbsp;&nbsp;
+            <span class="glyphicon glyphicon-plus" ng-click="item.setQuantity(1, true)"></span></td>
+          <td>{{ item.getPrice() | currency}}</td>
+          <td>{{ item.getTotal() | currency }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

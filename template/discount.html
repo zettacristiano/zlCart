@@ -1,0 +1,11 @@
+<div class="zlCart discount">
+  <div class="input-group">
+    <input type="text" ng-model="code" class="form-control" placeholder="Code...">
+    <span class="input-group-btn">
+    <button class="btn btn-default" type="button" ng-click="setCodeDiscount(code)">Add</button>
+  </span>
+  </div>
+  <div class="alert alert-success" ng-class="{'alert-success':message.success,'alert-success':!message.success}">
+    {{message.text}}
+  </div>
+</div>

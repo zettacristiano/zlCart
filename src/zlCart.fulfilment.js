@@ -49,5 +49,4 @@ angular.module('zlCart.fulfilment', [])
 }])
 
 .service('zlCart.fulfilment.paypal', ['$http', 'zlCart', function ($http, zlCart) {
-
 }]);
