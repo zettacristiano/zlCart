@@ -3,7 +3,7 @@
   "description": "Shopping Cart built for AngularJS",
   "keywords": ["AngularJS", "module", "directive", "shopping cart", "e-commerce", "cart", "basket", "shopping"],
   "authors": [],
-  "version": "1.0.9",
+  "version": "1.0.10",
   "homepage": "",
   "license": "MIT",
   "main": "dist/zlCart.js",
