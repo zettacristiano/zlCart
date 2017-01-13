@@ -84,6 +84,53 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
     };
   }])
 
+  .directive('zlcartTax', ['zlCart', function (zlCart) {
+    return {
+      restrict: 'E',
+      controller: 'zlCartController',
+      scope: {},
+      transclude: true,
+      replace: true,
+      templateUrl: function (element, attrs) {
+        if (typeof attrs.templateUrl == 'undefined') {
+          return 'template/carttax.html';
+        } else {
+          return attrs.templateUrl;
+        }
+      },
+      link: function (scope, element, attrs) {
+        var flags = [];
+        var taxOut = [];
+        var total = 0;
+        angular.forEach(zlCart.getCart().items, function (item) {
+          var taxRate = item.getTax();
+          var taxTotal = item.getTotal();
+          var taxValue = +parseFloat(taxTotal / 100 * taxRate).toFixed(2);
+          if (!flags[taxRate]) {
+            flags[taxRate] = true;
+            taxOut.push({
+              rate: taxRate,
+              tax: taxValue,
+              value: taxTotal
+            });
+          } else {
+            for (var x = 0; x < taxOut.length; x++) {
+              if (taxOut[x].rate !== taxRate) continue;
+              taxOut[x].tax += taxValue;
+              taxOut[x].value += taxTotal;
+            }
+          }
+        });
+        taxOut.forEach(function (item) {
+          total += item.value;
+        })
+
+        scope.taxsRate = taxOut;
+        scope.taxTotal = total;
+      }
+    };
+  }])
+
   .directive('zlcartDiscount', ['zlCartDiscount', function (zlCartDiscount) {
     return {
       restrict: 'E',
@@ -100,22 +147,23 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       },
       link: function (scope, element, attrs) {
         scope.attrs = attrs;
-        scope.message = null;
+        scope.message = {};
         scope.$watch('code', function (newValue, oldValue) {
-          if (newValue !== oldValue) scope.message = null;
+          if (newValue !== oldValue) scope.message = {};
         });
         scope.setCodeDiscount = function (code) {
-          zlCartDiscount.setDiscount(code).then(function (success) {
-            scope.message = {
-              success: true,
-              text: 'Código consumido com sucesso.'
-            };
+          zlCartDiscount.setDiscount(code, function (err) {
+            scope.message.msg = true;
+            if (err) {
+              scope.message.success = false;
+              scope.message.text = err.data;
+              return;
+            }
+
+            scope.message.success = true;
+            scope.message.text = 'Código consumido com sucesso.';
+
             scope.code = "";
-          }).catch(function (err) {
-            scope.message = {
-              success: false,
-              text: err
-            };
           });
         };
       }

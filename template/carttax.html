@@ -1,0 +1,25 @@
+<table class="table table-hover zlCart cart">
+  <thead>
+    <tr>
+      <th class="text-right">Tipo</th>
+      <th class="text-right">Valor</th>
+      <th class="text-right">Iva</th>
+      <th class="text-right">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ng-repeat="tax in taxsRate track by $index">
+      <td class="num text-right">{{ tax.rate }}%</td>
+      <td class="num text-right">{{ tax.value - tax.tax | currency }}</td>
+      <td class="num text-right">{{ tax.tax | currency }}</td>
+      <td class="num text-right">{{ tax.value | currency }}</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2"></td>
+      <td class="text-right"><strong>Total</strong></td>
+      <td class="num text-right">{{ taxTotal | currency }}</td>
+    </tr>
+  </tfoot>
+</table>

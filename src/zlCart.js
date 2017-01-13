@@ -24,7 +24,6 @@ angular.module('zlCart', ['zlCart.directives'])
     this.init = function () {
       this.$cart = {
         shipping: null,
-        tax: [],
         items: []
       };
     };
@@ -33,7 +32,7 @@ angular.module('zlCart', ['zlCart.directives'])
       var inCart = this.getItemById(id);
       if (typeof inCart === 'object') {
         //Update quantity of an item if it's already in the cart
-        inCart.setQuantity(quantity, false);
+        inCart.setQuantity(quantity, true);
       } else {
         var newItem = new zlCartItem(id, name, price, tax, quantity, discount, data);
         this.$cart.items.push(newItem);
@@ -63,27 +62,6 @@ angular.module('zlCart', ['zlCart.directives'])
     this.getShipping = function () {
       if (this.getCart().items.length == 0) return 0;
       return this.getCart().shipping;
-    };
-
-    this.getTax = function () {
-      var flags = [];
-      angular.forEach(this.getCart().items, function (item) {
-        var taxRate = item.getTax();
-        var taxValue = +parseFloat(item.getTotal() * taxRate).toFixed(2);
-        if (!flags[taxRate]) {
-          flags[taxRate] = true;
-          this.$cart.tax.push({
-            rate: taxRate,
-            value: taxValue
-          });
-        } else {
-          for (var x = 0; x < this.$cart.tax.length; x++) {
-            if (this.$cart.tax[x].rate !== taxRate) continue;
-            this.$cart.tax[x].value += taxValue;
-          }
-        }
-      });
-      return this.$cart.tax;
     };
 
     this.setCart = function (cart) {
@@ -137,9 +115,11 @@ angular.module('zlCart', ['zlCart.directives'])
     };
 
     this.getTotalDiscount = function () {
-      var total = +parseFloat(this.getSubTotal() - this.getSubTotalWithDiscount()).toFixed(2);
-      if (total < 0) total = 0;
-      return total;
+      var total = 0;
+      angular.forEach(this.getCart().items, function (item) {
+        total += item.getTotal() - item.getTotalWithDiscount();
+      });
+      return +parseFloat(total).toFixed(2);
     };
 
     this.totalCost = function () {
@@ -183,7 +163,6 @@ angular.module('zlCart', ['zlCart.directives'])
 
       return {
         shipping: this.getShipping(),
-        tax: this.getTax(),
         subTotal: this.getSubTotal(),
         totalCost: this.totalCost(),
         items: items
@@ -194,7 +173,6 @@ angular.module('zlCart', ['zlCart.directives'])
       var _self = this;
       _self.init();
       _self.$cart.shipping = storedCart.shipping;
-      //_self.$cart.tax = storedCart.tax;
 
       angular.forEach(storedCart.items, function (item) {
         _self.$cart.items.push(new zlCartItem(item._id, item._name, item._price, item._tax, item._quantity, item._discount, item._data));
@@ -241,7 +219,7 @@ angular.module('zlCart', ['zlCart.directives'])
     };
 
     item.prototype.setTax = function (tax) {
-      this._tax = (tax || 0) / 100;
+      this._tax = +tax;
     };
 
     item.prototype.getTax = function (tax) {
@@ -258,11 +236,11 @@ angular.module('zlCart', ['zlCart.directives'])
     };
 
     item.prototype.getPrice = function () {
-      return this._price + (this._price * this._tax);
+      return this._price;
     };
 
     item.prototype.getPriceWithoutTax = function () {
-      return this._price;
+      return this._price - (this._price / 100 * this._tax);
     };
 
     item.prototype.getPriceWithDiscount = function () {
@@ -331,14 +309,14 @@ angular.module('zlCart', ['zlCart.directives'])
         id: this.getId(),
         name: this.getName(),
         price: this.getPrice(),
-        priceWithTax: this.getPriceWithoutTax(),
+        priceWithoutTax: this.getPriceWithoutTax(),
         priceWithDiscount: this.getPriceWithDiscount(),
         tax: this.getTax(),
         discount: this.getDiscount(),
         quantity: this.getQuantity(),
         data: this.getData(),
         total: this.getTotal(),
-        totalWithTax: this.getTotalWithoutTax(),
+        totalWithoutTax: this.getTotalWithoutTax(),
         totalWithDiscount: this.getTotalWithDiscount()
       }
     };
@@ -380,9 +358,7 @@ angular.module('zlCart', ['zlCart.directives'])
       return this.urlDiscount;
     };
 
-    this.setDiscount = function (code) {
-      var deferred = $q.defer();
-
+    this.setDiscount = function (code, callback) {
       var cart = zlCart.getCart();
       $http.post(this.getUrlDiscount() + code, {
         cart: cart
@@ -390,16 +366,15 @@ angular.module('zlCart', ['zlCart.directives'])
         if (response.data) {
           zlCart.$restore(angular.fromJson(response.data));
         }
-        deferred.resolve();
+        callback();
       }, function (error) {
-        deferred.reject('Código não Válido');
+        callback(error);
       })
-      return deferred.promise;
-    }
+    };
   }])
 
   .controller('CartController', ['$scope', 'zlCart', function ($scope, zlCart) {
     $scope.zlCart = zlCart;
   }])
 
-  .value('version', '1.0.8');
+  .value('version', '1.0.9');
