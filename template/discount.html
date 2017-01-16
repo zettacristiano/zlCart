@@ -1,9 +1,10 @@
-<div class="zlCart discount">
+<div class="zlCart discount" ng-hide="zlCart.isEmpty()">
   <div class="input-group">
-    <input type="text" ng-model="code" class="form-control" placeholder="Code...">
-    <span class="input-group-btn">
-    <button class="btn btn-default" type="button" ng-click="setCodeDiscount(code)">Add</button>
-  </span>
+    <input type="text" ng-model="code" class="form-control" ng-disabled="zlCart.getPromoCode()" placeholder="Code...">
+    <div class="input-group-btn">
+      <button ng-hide="zlCart.getPromoCode()" class="btn btn-default" type="button" ng-click="setCodeDiscount(code)">Aplicar</button>
+      <button ng-show="zlCart.getPromoCode()" class="btn btn-default" type="button" ng-click="removeCodeDiscount(code)">Remover</button>
+    </div>
   </div>
   <div class="alert alert-success" ng-class="{'alert-success':message.success,'alert-success':!message.success}">
     {{message.text}}

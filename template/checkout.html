@@ -1,4 +1,4 @@
-<div class="zlCart checkout">
+<div class="zlCart checkout" ng-hide="zlCart.isEmpty()">
   <div ng-if="service=='http' || service == 'log' || service == 'meowallet'">
     <button class="btn btn-primary" ng-click="checkout()" ng-disabled="!zlCart.getTotalItems()" ng-transclude>Checkout</button>
   </div>

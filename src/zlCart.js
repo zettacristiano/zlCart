@@ -24,6 +24,7 @@ angular.module('zlCart', ['zlCart.directives'])
     this.init = function () {
       this.$cart = {
         shipping: null,
+        promoCode: null,
         items: []
       };
     };
@@ -52,6 +53,15 @@ angular.module('zlCart', ['zlCart.directives'])
         }
       });
       return build;
+    };
+
+    this.setPromoCode = function (code) {
+      this.$cart.promoCode = code;
+      return this.getPromoCode();
+    };
+
+    this.getPromoCode = function () {
+      return this.getCart().promoCode;
     };
 
     this.setShipping = function (shipping) {
@@ -377,4 +387,4 @@ angular.module('zlCart', ['zlCart.directives'])
     $scope.zlCart = zlCart;
   }])
 
-  .value('version', '1.0.10');
+  .value('version', '1.0.11');

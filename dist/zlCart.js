@@ -24,6 +24,7 @@ angular.module('zlCart', ['zlCart.directives'])
     this.init = function () {
       this.$cart = {
         shipping: null,
+        promoCode: null,
         items: []
       };
     };
@@ -52,6 +53,15 @@ angular.module('zlCart', ['zlCart.directives'])
         }
       });
       return build;
+    };
+
+    this.setPromoCode = function (code) {
+      this.$cart.promoCode = code;
+      return this.getPromoCode();
+    };
+
+    this.getPromoCode = function () {
+      return this.getCart().promoCode;
     };
 
     this.setShipping = function (shipping) {
@@ -377,7 +387,7 @@ angular.module('zlCart', ['zlCart.directives'])
     $scope.zlCart = zlCart;
   }])
 
-  .value('version', '1.0.10');;'use strict';
+  .value('version', '1.0.11');;'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
 
@@ -478,34 +488,40 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         }
       },
       link: function (scope, element, attrs) {
-        var flags = [];
-        var taxOut = [];
-        var total = 0;
-        angular.forEach(zlCart.getCart().items, function (item) {
-          var taxRate = item.getTax();
-          var taxTotal = item.getTotal();
-          var taxValue = +parseFloat(taxTotal / 100 * taxRate).toFixed(2);
-          if (!flags[taxRate]) {
-            flags[taxRate] = true;
-            taxOut.push({
-              rate: taxRate,
-              tax: taxValue,
-              value: taxTotal
-            });
-          } else {
-            for (var x = 0; x < taxOut.length; x++) {
-              if (taxOut[x].rate !== taxRate) continue;
-              taxOut[x].tax += taxValue;
-              taxOut[x].value += taxTotal;
+        function init() {
+          var flags = [];
+          var taxOut = [];
+          var total = 0;
+          angular.forEach(zlCart.getCart().items, function (item) {
+            var taxRate = item.getTax();
+            var taxTotal = item.getTotalWithDiscount();
+            var taxValue = +parseFloat(taxTotal / 100 * taxRate).toFixed(2);
+            if (!flags[taxRate]) {
+              flags[taxRate] = true;
+              taxOut.push({
+                rate: taxRate,
+                tax: taxValue,
+                value: taxTotal
+              });
+            } else {
+              for (var x = 0; x < taxOut.length; x++) {
+                if (taxOut[x].rate !== taxRate) continue;
+                taxOut[x].tax += taxValue;
+                taxOut[x].value += taxTotal;
+              }
             }
-          }
-        });
-        taxOut.forEach(function (item) {
-          total += item.value;
-        })
+          });
+          taxOut.forEach(function (item) {
+            total += item.value;
+          })
 
-        scope.taxsRate = taxOut;
-        scope.taxTotal = total;
+          scope.taxsRate = taxOut;
+          scope.taxTotal = total;
+        }
+        scope.$on("zlCart:change", function () {
+          init();
+        });
+        init();
       }
     };
   }])
@@ -516,7 +532,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       controller: 'zlCartController',
       scope: {},
       transclude: true,
-      replace: true,
+      replace: false,
       templateUrl: function (element, attrs) {
         if (typeof attrs.templateUrl == 'undefined') {
           return 'template/discount.html';
@@ -557,7 +573,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         settings: '='
       },
       transclude: true,
-      replace: true,
+      replace: false,
       templateUrl: function (element, attrs) {
         if (typeof attrs.templateUrl == 'undefined') {
           return 'template/checkout.html';
