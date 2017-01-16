@@ -10,9 +10,9 @@ module.exports = function (grunt) {
     pkg: grunt.file.readJSON('package.json'),
 
     concat: {
-      options: {
-        separator: ';'
-      },
+      //  options: {
+      //    separator: ';'
+      //},
       dist: {
         src: ['src/zlCart.js', 'src/zlCart.directives.js', 'src/zlCart.fulfilment.js'],
         dest: "dist/zlCart.js"

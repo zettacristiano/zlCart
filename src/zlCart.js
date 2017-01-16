@@ -173,6 +173,7 @@ angular.module('zlCart', ['zlCart.directives'])
 
       return {
         shipping: this.getShipping(),
+        promoCode: this.getPromoCode(),
         subTotal: this.getSubTotal(),
         totalCost: this.totalCost(),
         items: items
@@ -374,6 +375,7 @@ angular.module('zlCart', ['zlCart.directives'])
         cart: cart
       }).then(function (response) {
         if (response.data) {
+          zlCart.setPromoCode(code);
           zlCart.$restore(angular.fromJson(response.data));
         }
         callback();
@@ -387,4 +389,4 @@ angular.module('zlCart', ['zlCart.directives'])
     $scope.zlCart = zlCart;
   }])
 
-  .value('version', '1.0.11');
+  .value('version', '1.0.12');

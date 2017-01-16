@@ -154,9 +154,13 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       link: function (scope, element, attrs) {
         scope.attrs = attrs;
         scope.message = {};
+        if (scope.zlCart.getPromoCode()) {
+          scope.code = scope.zlCart.getPromoCode();
+        }
         scope.$watch('code', function (newValue, oldValue) {
           if (newValue !== oldValue) scope.message = {};
         });
+
         scope.setCodeDiscount = function (code) {
           zlCartDiscount.setDiscount(code, function (err) {
             scope.message.msg = true;
