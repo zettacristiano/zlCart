@@ -7,7 +7,7 @@
 .shopping-cart .shopping-empty {
   background-color: #fff;
   padding: 20px 0;
-  font-size: 1.3rem;
+  font-size: 1.3em;
 }
 
 .shopping-cart .shopping-empty:before {

@@ -3,19 +3,19 @@
 // grunt karma:once
 
 
-module.exports = function (grunt) {
+module.exports = function(grunt) {
 
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
 
     concat: {
-      //  options: {
-      //    separator: ';'
-      //},
+      options: {
+        separator: ';'
+      },
       dist: {
         src: ['src/zlCart.js', 'src/zlCart.directives.js', 'src/zlCart.fulfilment.js'],
-        dest: "dist/zlCart.js"
+        dest: "dist/zl-cart.js"
       }
     },
 
@@ -23,7 +23,7 @@ module.exports = function (grunt) {
       options: {},
       all: {
         src: ["src/*.css"],
-        dest: "dist/zlCart.css"
+        dest: "dist/zl-cart.css"
       }
     },
 
@@ -44,8 +44,8 @@ module.exports = function (grunt) {
         banner: '/*! <%= pkg.name %> v<%= pkg.version %> */\n <%= pkg.url %>'
       },
       dist: {
-        src: 'dist/zlCart.js',
-        dest: "dist/zlCart.min.js"
+        src: 'dist/zl-cart.js',
+        dest: "dist/zl-cart.min.js"
       }
     },
 

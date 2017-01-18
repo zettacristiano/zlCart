@@ -1,13 +1,13 @@
 {
   "name": "zl-cart",
   "private": false,
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "Really simple shopping cart for AngularJS",
   "license": "MIT",
   "tags": "AngularJS, directive, module, shopping cart, shopping basket",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zettacristiano/zlCart.git"
+    "url": "https://github.com/zettalink/zl-cart.git"
   },
   "author": "",
   "devDependencies": {
