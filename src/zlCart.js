@@ -1,338 +1,337 @@
 'use strict';
 
-angular.module('zlCart.directives', ['zlCart.fulfilment'])
+angular.module('zlCart', ['zlCart.directives'])
 
-.controller('zlCartController', ['$scope', 'zlCart', function($scope, zlCart) {
-  $scope.zlCart = zlCart;
-}])
+.config([function() {}])
 
-.directive('zlcartAddtocart', ['zlCart', function(zlCart) {
-  return {
-    restrict: 'E',
-    controller: 'zlCartController',
-    scope: {
-      id: '@',
-      name: '@',
-      quantity: '@',
-      quantityMax: '@',
-      price: '@',
-      tax: '@',
-      data: '='
-    },
-    transclude: true,
-    replace: true,
-    templateUrl: function(element, attrs) {
-      if (typeof attrs.templateUrl == 'undefined') {
-        return 'template/addtocart.html';
-      } else {
-        return attrs.templateUrl;
-      }
-    },
-    link: function(scope, element, attrs) {
-      scope.attrs = attrs;
-      scope.inCart = function() {
-        return zlCart.getItemById(attrs.id);
-      };
+.provider('$zlCart', function() {
+  this.$get = function() {};
+})
 
-      if (scope.inCart()) {
-        scope.q = zlCart.getItemById(attrs.id).getQuantity();
-      } else {
-        scope.q = parseInt(scope.quantity);
-      }
+.run(['$rootScope', 'zlCart', 'zlCartItem', 'zlStore', function($rootScope, zlCart, zlCartItem, zlStore) {
+  $rootScope.$on('zlCart:change', function() {
+    zlCart.$save();
+  });
 
-      scope.qtyOpt = [];
-      for (var i = 1; i <= scope.quantityMax; i++) {
-        scope.qtyOpt.push(i);
-      }
-    }
-  };
-}])
-
-.directive('zlcartCart', [function() {
-  return {
-    restrict: 'E',
-    controller: 'zlCartController',
-    scope: {},
-    replace: true,
-    templateUrl: function(element, attrs) {
-      if (typeof attrs.templateUrl == 'undefined') {
-        return 'template/cart.html';
-      } else {
-        return attrs.templateUrl;
-      }
-    },
-    link: function(scope, element, attrs) {
-
-    }
-  };
-}])
-
-.directive('zlcartSummary', [function() {
-  return {
-    restrict: 'E',
-    controller: 'zlCartController',
-    scope: {},
-    transclude: true,
-    replace: true,
-    templateUrl: function(element, attrs) {
-      if (typeof attrs.templateUrl == 'undefined') {
-        return 'template/summary.html';
-      } else {
-        return attrs.templateUrl;
-      }
-    }
-  };
-}])
-
-.directive('zlcartTax', ['zlCart', function(zlCart) {
-  return {
-    restrict: 'E',
-    controller: 'zlCartController',
-    scope: {},
-    transclude: true,
-    replace: true,
-    templateUrl: function(element, attrs) {
-      if (typeof attrs.templateUrl == 'undefined') {
-        return 'template/carttax.html';
-      } else {
-        return attrs.templateUrl;
-      }
-    },
-    link: function(scope, element, attrs) {
-      function init() {
-        var flags = [];
-        var taxOut = [];
-        var total = 0;
-        angular.forEach(zlCart.getCart().items, function(item) {
-          var taxRate = item.getTax();
-          var taxTotal = item.getTotalWithDiscount();
-          var taxValue = +parseFloat(taxTotal / 100 * taxRate).toFixed(2);
-          if (!flags[taxRate]) {
-            flags[taxRate] = true;
-            taxOut.push({
-              rate: taxRate,
-              tax: taxValue,
-              value: taxTotal
-            });
-          } else {
-            for (var x = 0; x < taxOut.length; x++) {
-              if (taxOut[x].rate !== taxRate) continue;
-              taxOut[x].tax += taxValue;
-              taxOut[x].value += taxTotal;
-            }
-          }
-        });
-        taxOut.forEach(function(item) {
-          total += item.value;
-        })
-
-        scope.taxsRate = taxOut;
-        scope.taxTotal = total;
-      }
-      scope.$on("zlCart:change", function() {
-        init();
-      });
-      init();
-    }
-  };
-}])
-
-.directive('zlcartDiscount', ['zlCartDiscount', function(zlCartDiscount) {
-  return {
-    restrict: 'E',
-    controller: 'zlCartController',
-    scope: {},
-    transclude: true,
-    replace: false,
-    templateUrl: function(element, attrs) {
-      if (typeof attrs.templateUrl == 'undefined') {
-        return 'template/discount.html';
-      } else {
-        return attrs.templateUrl;
-      }
-    },
-    link: function(scope, element, attrs) {
-      scope.attrs = attrs;
-      scope.message = {};
-      if (scope.zlCart.getPromoCode()) {
-        scope.code = scope.zlCart.getPromoCode();
-      }
-      scope.$watch('code', function(newValue, oldValue) {
-        if (newValue !== oldValue) scope.message = {};
-      });
-
-      scope.setCodeDiscount = function(code) {
-        zlCartDiscount.setDiscount(code, function(err) {
-          scope.message.msg = true;
-          if (err) {
-            scope.message.success = false;
-            scope.message.text = err.data;
-            return;
-          }
-
-          scope.message.success = true;
-          scope.message.text = 'Código consumido com sucesso.';
-
-          scope.code = "";
-        });
-      };
-    }
-  };
-}])
-
-.directive('zlcartCheckout', [function() {
-  return {
-    restrict: 'E',
-    scope: {
-      service: '@',
-      settings: '='
-    },
-    transclude: true,
-    replace: false,
-    templateUrl: function(element, attrs) {
-      if (typeof attrs.templateUrl == 'undefined') {
-        return 'template/checkout.html';
-      } else {
-        return attrs.templateUrl;
-      }
-    },
-    controller: ('zlCartController', ['$rootScope', '$scope', '$window', 'zlCart', 'fulfilmentProvider', function($rootScope, $scope, $window, zlCart, fulfilmentProvider) {
-      $scope.zlCart = zlCart;
-
-      $scope.checkout = function() {
-        fulfilmentProvider.setService($scope.service);
-        fulfilmentProvider.setSettings($scope.settings);
-        fulfilmentProvider.checkout()
-          .then(function(data, status, headers, config) {
-            if ($scope.service === 'meowallet') {
-              $window.location.href = data.url_redirect;
-            }
-            $rootScope.$broadcast('zlCart:checkout_succeeded', data);
-          })
-          .catch(function(data, status, headers, config) {
-            $rootScope.$broadcast('zlCart:checkout_failed', {
-              statusCode: status,
-              error: data
-            });
-          });
-      }
-    }])
-  };
-}]);
-item.prototype.setName = function(name) {
-  if (name) this._name = name;
-  else {
-    $log.error('A name must be provided');
-  }
-};
-
-item.prototype.getName = function() {
-  return this._name;
-};
-
-item.prototype.setTax = function(tax) {
-  this._tax = +tax;
-};
-
-item.prototype.getTax = function(tax) {
-  return this._tax;
-};
-
-item.prototype.setPrice = function(price) {
-  var priceFloat = parseFloat(price || 0);
-  if (priceFloat >= 0) {
-    this._price = priceFloat;
+  if (angular.isObject(zlStore.get('zlcart'))) {
+    zlCart.$restore(zlStore.get('zlcart'));
   } else {
-    $log.error('A price must be over 0');
+    zlCart.init();
   }
-};
+}])
 
-item.prototype.getPrice = function() {
-  return this._price;
-};
+.service('zlCart', ['$rootScope', 'zlCartItem', 'zlStore', function($rootScope, zlCartItem, zlStore) {
+  this.init = function() {
+    this.$cart = {
+      shipping: null,
+      promoCode: null,
+      items: []
+    };
+  };
 
-item.prototype.getPriceWithoutTax = function() {
-  return this._price - (this._price / 100 * this._tax);
-};
-
-item.prototype.getPriceWithDiscount = function() {
-  var priceFloat = this.getPrice();
-  return priceFloat - (priceFloat * (this.getDiscount() / 100));
-};
-
-item.prototype.setDiscount = function(discount) {
-  var discountInt = parseInt(discount || 0);
-  if (discountInt >= 0) {
-    this._discount = discountInt;
-  } else {
-    this._discount = 0;
-  }
-  $rootScope.$broadcast('zlCart:change', {});
-};
-
-item.prototype.getDiscount = function() {
-  return this._discount;
-};
-
-item.prototype.setQuantity = function(quantity, relative) {
-  var quantityInt = parseInt(quantity);
-  if (quantityInt % 1 === 0) {
-    if (relative === true) {
-      this._quantity += quantityInt;
+  this.addItem = function(id, name, price, tax, quantity, discount, data) {
+    var inCart = this.getItemById(id);
+    if (typeof inCart === 'object') {
+      //Update quantity of an item if it's already in the cart
+      inCart.setQuantity(quantity, true);
     } else {
-      this._quantity = quantityInt;
+      var newItem = new zlCartItem(id, name, price, tax, quantity, discount, data);
+      this.$cart.items.push(newItem);
+      $rootScope.$broadcast('zlCart:itemAdded', newItem);
     }
-    if (this._quantity < 1) this._quantity = 1;
 
-  } else {
-    this._quantity = 1;
-    $log.info('Quantity must be an integer and was defaulted to 1');
+    $rootScope.$broadcast('zlCart:change', {});
+  };
+
+  this.getItemById = function(itemId) {
+    var items = this.getCart().items;
+    var build = false;
+
+    angular.forEach(items, function(item) {
+      if (item.getId() === itemId) {
+        build = item;
+      }
+    });
+    return build;
+  };
+
+  this.setPromoCode = function(code) {
+    this.$cart.promoCode = code;
+    return this.getPromoCode();
+  };
+
+  this.getPromoCode = function() {
+    return this.getCart().promoCode;
+  };
+
+  this.setShipping = function(shipping) {
+    this.$cart.shipping = shipping;
+    return this.getShipping();
+  };
+
+  this.getShipping = function() {
+    if (this.getCart().items.length == 0) return 0;
+    return this.getCart().shipping;
+  };
+
+  this.setCart = function(cart) {
+    this.$cart = cart;
+    return this.getCart();
+  };
+
+  this.getCart = function() {
+    return this.$cart;
+  };
+
+  this.getItems = function() {
+    return this.getCart().items;
+  };
+
+  this.getTotalItems = function() {
+    var count = 0;
+    var items = this.getItems();
+    angular.forEach(items, function(item) {
+      count += item.getQuantity();
+    });
+    return count;
+  };
+
+  this.getTotalUniqueItems = function() {
+    return this.getCart().items.length;
+  };
+
+  this.getSubTotal = function() {
+    var total = 0;
+    angular.forEach(this.getCart().items, function(item) {
+      total += item.getTotal();
+    });
+    return +parseFloat(total).toFixed(2);
+  };
+
+  this.getSubTotalWithoutTax = function() {
+    var total = 0;
+    angular.forEach(this.getCart().items, function(item) {
+      total += item.getTotalWithoutTax();
+    });
+    return +parseFloat(total).toFixed(2);
+  };
+
+  this.getSubTotalWithDiscount = function() {
+    var total = 0;
+    angular.forEach(this.getCart().items, function(item) {
+      total += item.getTotalWithDiscount();
+    });
+    return +parseFloat(total).toFixed(2);
+  };
+
+  this.getTotalDiscount = function() {
+    var total = 0;
+    angular.forEach(this.getCart().items, function(item) {
+      total += item.getTotal() - item.getTotalWithDiscount();
+    });
+    return +parseFloat(total).toFixed(2);
+  };
+
+  this.totalCost = function() {
+    return +parseFloat(this.getSubTotal() - this.getTotalDiscount() + this.getShipping());
+  };
+
+  this.removeItem = function(index) {
+    this.$cart.items.splice(index, 1);
+    $rootScope.$broadcast('zlCart:itemRemoved', {});
+    $rootScope.$broadcast('zlCart:change', {});
+  };
+
+  this.removeItemById = function(id) {
+    var cart = this.getCart();
+    angular.forEach(cart.items, function(item, index) {
+      if (item.getId() === id) {
+        cart.items.splice(index, 1);
+      }
+    });
+    this.setCart(cart);
+    $rootScope.$broadcast('zlCart:itemRemoved', {});
+    $rootScope.$broadcast('zlCart:change', {});
+  };
+
+  this.empty = function() {
+    $rootScope.$broadcast('zlCart:change', {});
+    this.$cart.items = [];
+    localStorage.removeItem('zlcart');
+  };
+
+  this.isEmpty = function() {
+    return (this.$cart.items.length > 0 ? false : true);
+  };
+
+  this.toObject = function() {
+    if (this.getItems().length === 0) return false;
+    var items = [];
+    angular.forEach(this.getItems(), function(item) {
+      items.push(item.toObject());
+    });
+
+    return {
+      shipping: this.getShipping(),
+      promoCode: this.getPromoCode(),
+      subTotal: this.getSubTotal(),
+      totalCost: this.totalCost(),
+      items: items
+    }
+  };
+
+  this.$restore = function(storedCart) {
+    var _self = this;
+    _self.init();
+    _self.$cart.shipping = storedCart.shipping;
+
+    angular.forEach(storedCart.items, function(item) {
+      _self.$cart.items.push(new zlCartItem(item._id, item._name, item._price, item._tax, item._quantity, item._discount, item._data));
+    });
+    this.$save();
+  };
+
+  this.$save = function() {
+    return zlStore.set('zlcart', JSON.stringify(this.getCart()));
   }
-  $rootScope.$broadcast('zlCart:change', {});
-};
+}])
 
-item.prototype.getQuantity = function() {
-  return this._quantity;
-};
+.factory('zlCartItem', ['$rootScope', '$log', function($rootScope, $log) {
+  var item = function(id, name, price, tax, quantity, discount, data) {
+    this.setId(id);
+    this.setName(name);
+    this.setTax(tax);
+    this.setPrice(price);
+    this.setDiscount(discount);
+    this.setQuantity(quantity);
+    this.setData(data);
+  };
 
-item.prototype.setData = function(data) {
-  if (data) this._data = data;
-};
+  item.prototype.setId = function(id) {
+    if (id) this._id = id;
+    else {
+      $log.error('An ID must be provided');
+    }
+  };
 
-item.prototype.getData = function() {
-  if (this._data) return this._data;
-  else $log.info('This item has no data');
-};
+  item.prototype.getId = function() {
+    return this._id;
+  };
 
-item.prototype.getTotal = function() {
-  return +parseFloat(this.getQuantity() * this.getPrice()).toFixed(2);
-};
+  item.prototype.setName = function(name) {
+    if (name) this._name = name;
+    else {
+      $log.error('A name must be provided');
+    }
+  };
 
-item.prototype.getTotalWithoutTax = function() {
-  return +parseFloat(this.getQuantity() * this.getPriceWithoutTax()).toFixed(2);
-};
+  item.prototype.getName = function() {
+    return this._name;
+  };
 
-item.prototype.getTotalWithDiscount = function() {
-  return +parseFloat(this.getQuantity() * this.getPriceWithDiscount()).toFixed(2);
-};
+  item.prototype.setTax = function(tax) {
+    this._tax = +tax;
+  };
 
-item.prototype.toObject = function() {
-  return {
-    id: this.getId(),
-    name: this.getName(),
-    price: this.getPrice(),
-    priceWithoutTax: this.getPriceWithoutTax(),
-    priceWithDiscount: this.getPriceWithDiscount(),
-    tax: this.getTax(),
-    discount: this.getDiscount(),
-    quantity: this.getQuantity(),
-    data: this.getData(),
-    total: this.getTotal(),
-    totalWithoutTax: this.getTotalWithoutTax(),
-    totalWithDiscount: this.getTotalWithDiscount()
-  }
-};
-return item;
+  item.prototype.getTax = function(tax) {
+    return this._tax;
+  };
+
+  item.prototype.setPrice = function(price) {
+    var priceFloat = parseFloat(price || 0);
+    if (priceFloat >= 0) {
+      this._price = priceFloat;
+    } else {
+      $log.error('A price must be over 0');
+    }
+  };
+
+  item.prototype.getPrice = function() {
+    return this._price;
+  };
+
+  item.prototype.getPriceWithoutTax = function() {
+    return this._price - (this._price / 100 * this._tax);
+  };
+
+  item.prototype.getPriceWithDiscount = function() {
+    var priceFloat = this.getPrice();
+    return priceFloat - (priceFloat * (this.getDiscount() / 100));
+  };
+
+  item.prototype.setDiscount = function(discount) {
+    var discountInt = parseInt(discount || 0);
+    if (discountInt >= 0) {
+      this._discount = discountInt;
+    } else {
+      this._discount = 0;
+    }
+    $rootScope.$broadcast('zlCart:change', {});
+  };
+
+  item.prototype.getDiscount = function() {
+    return this._discount;
+  };
+
+  item.prototype.setQuantity = function(quantity, relative) {
+    var quantityInt = parseInt(quantity);
+    if (quantityInt % 1 === 0) {
+      if (relative === true) {
+        this._quantity += quantityInt;
+      } else {
+        this._quantity = quantityInt;
+      }
+      if (this._quantity < 1) this._quantity = 1;
+
+    } else {
+      this._quantity = 1;
+      $log.info('Quantity must be an integer and was defaulted to 1');
+    }
+    $rootScope.$broadcast('zlCart:change', {});
+  };
+
+  item.prototype.getQuantity = function() {
+    return this._quantity;
+  };
+
+  item.prototype.setData = function(data) {
+    if (data) this._data = data;
+  };
+
+  item.prototype.getData = function() {
+    if (this._data) return this._data;
+    else $log.info('This item has no data');
+  };
+
+  item.prototype.getTotal = function() {
+    return +parseFloat(this.getQuantity() * this.getPrice()).toFixed(2);
+  };
+
+  item.prototype.getTotalWithoutTax = function() {
+    return +parseFloat(this.getQuantity() * this.getPriceWithoutTax()).toFixed(2);
+  };
+
+  item.prototype.getTotalWithDiscount = function() {
+    return +parseFloat(this.getQuantity() * this.getPriceWithDiscount()).toFixed(2);
+  };
+
+  item.prototype.toObject = function() {
+    return {
+      id: this.getId(),
+      name: this.getName(),
+      price: this.getPrice(),
+      priceWithoutTax: this.getPriceWithoutTax(),
+      priceWithDiscount: this.getPriceWithDiscount(),
+      tax: this.getTax(),
+      discount: this.getDiscount(),
+      quantity: this.getQuantity(),
+      data: this.getData(),
+      total: this.getTotal(),
+      totalWithoutTax: this.getTotalWithoutTax(),
+      totalWithDiscount: this.getTotalWithDiscount()
+    }
+  };
+  return item;
 }])
 
 .service('zlStore', ['$window', function($window) {
