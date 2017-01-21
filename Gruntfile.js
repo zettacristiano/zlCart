@@ -1,8 +1,3 @@
-// grunt build
-// grunt karma:unit:start watch
-// grunt karma:once
-
-
 module.exports = function(grunt) {
 
   grunt.initConfig({
@@ -47,29 +42,6 @@ module.exports = function(grunt) {
         src: 'dist/zl-cart.js',
         dest: "dist/zl-cart.min.js"
       }
-    },
-
-    karma: {
-      unit: {
-        configFile: 'karma.conf.js',
-        background: true
-      },
-      once: {
-        configFile: 'karma.conf.js',
-        singleRun: true
-      },
-      travis: {
-        configFile: 'karma.conf.js',
-        singleRun: true,
-        browsers: ['PhantomJS']
-      }
-    },
-
-    watch: {
-      karma: {
-        files: ['src/**/*.js'],
-        tasks: ['karma:unit:run']
-      }
     }
 
   });
@@ -81,12 +53,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-karma');
 
   grunt.registerTask('build', ['concat', 'uglify', 'concat_css', 'cssmin']);
-  grunt.registerTask('devmode', ['karma:unit', 'watch']);
-  grunt.registerTask('testunit', ['karma:unit']);
-  grunt.registerTask('test', ['karma:travis']);
-
-  grunt.registerTask('default', ['test', 'build']);
+  grunt.registerTask('default', ['build']);
 };

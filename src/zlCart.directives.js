@@ -1,3 +1,4 @@
+//ZLCART.DIRECTIVES.JS
 'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
@@ -6,7 +7,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
   $scope.zlCart = zlCart;
 }])
 
-.directive('zlcartAddtocart', ['zlCart', function(zlCart) {
+.directive('zlcartAddtocart', ['zlCart', 'zlCartDiscount', function(zlCart, zlCartDiscount) {
   return {
     restrict: 'E',
     controller: 'zlCartController',
@@ -99,11 +100,13 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       }
     },
     link: function(scope, element, attrs) {
+      var inProcess = false;
+
       function init() {
         var flags = [];
         var taxOut = [];
         var total = 0;
-        angular.forEach(zlCart.getCart().items, function(item) {
+        angular.forEach(zlCart.getItems(), function(item) {
           var taxRate = item.getTax();
           var taxTotal = item.getTotalWithDiscount();
           var taxValue = +parseFloat(taxTotal / 100 * taxRate).toFixed(2);
@@ -128,16 +131,21 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
 
         scope.taxsRate = taxOut;
         scope.taxTotal = total;
+        inProcess = false;
       }
-      scope.$on("zlCart:change", function() {
-        init();
-      });
       init();
+
+      scope.$on("zlCart:change", function() {
+        if (!inProcess) {
+          inProcess = true;
+          init();
+        }
+      });
     }
   };
 }])
 
-.directive('zlcartDiscount', ['zlCartDiscount', function(zlCartDiscount) {
+.directive('zlcartDiscount', ['zlCart', 'zlCartDiscount', function(zlCart, zlCartDiscount) {
   return {
     restrict: 'E',
     controller: 'zlCartController',
@@ -154,28 +162,43 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
     link: function(scope, element, attrs) {
       scope.attrs = attrs;
       scope.message = {};
-      if (scope.zlCart.getPromoCode()) {
-        scope.code = scope.zlCart.getPromoCode();
+      if (zlCart.getPromo()) {
+        scope.code = zlCart.getPromo().code;
       }
       scope.$watch('code', function(newValue, oldValue) {
         if (newValue !== oldValue) scope.message = {};
       });
 
+      scope.removeCodeDiscount = function(code) {
+        zlCart.setPromo(null);
+      };
+
       scope.setCodeDiscount = function(code) {
-        zlCartDiscount.setDiscount(code, function(err) {
+        zlCartDiscount.setDiscount(code, true, function(err) {
           scope.message.msg = true;
           if (err) {
             scope.message.success = false;
-            scope.message.text = err.data;
+            scope.message.text = err;
             return;
           }
 
           scope.message.success = true;
           scope.message.text = 'Código consumido com sucesso.';
-
-          scope.code = "";
+          scope.code = zlCart.getPromo().code;
+          var myVar = setTimeout(function() {
+            scope.message.msg = false;
+            scope.$apply();
+            clearInterval(myVar);
+          }, 2500);
         });
       };
+
+      scope.$on("zlCart:change", function() {
+        var promo = zlCart.getPromo();
+        if (typeof promo === 'object') {
+          zlCartDiscount.setDiscount(promo.code, false, function(err) {});
+        }
+      });
     }
   };
 }])

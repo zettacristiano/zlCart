@@ -1,3 +1,4 @@
+//ZLCART.JS
 'use strict';
 
 angular.module('zlCart', ['zlCart.directives'])
@@ -24,7 +25,8 @@ angular.module('zlCart', ['zlCart.directives'])
   this.init = function() {
     this.$cart = {
       shipping: null,
-      promoCode: null,
+      promo: null,
+      canBuy: false,
       items: []
     };
   };
@@ -55,13 +57,31 @@ angular.module('zlCart', ['zlCart.directives'])
     return build;
   };
 
-  this.setPromoCode = function(code) {
-    this.$cart.promoCode = code;
-    return this.getPromoCode();
+  this.setStatusPay = function(status) {
+    this.$cart.canBuy = status;
+    return this.getStatusPay();
   };
 
-  this.getPromoCode = function() {
-    return this.getCart().promoCode;
+  this.getStatusPay = function() {
+    return (this.getCart().canBuy && this.getPromo() && this.getTotalItems() > 0);
+  };
+
+  this.setPromo = function(code) {
+    if (!code) {
+      this.getCart().items.forEach(function(item) {
+        item.setDiscount(0);
+      });
+      this.$cart.promo = null;
+      this.$cart.canBuy = true;
+    } else {
+      this.$cart.promo = code;
+    }
+    $rootScope.$broadcast('zlCart:change', {});
+    return this.getPromo();
+  };
+
+  this.getPromo = function() {
+    return this.getCart().promo || true;
   };
 
   this.setShipping = function(shipping) {
@@ -173,7 +193,8 @@ angular.module('zlCart', ['zlCart.directives'])
 
     return {
       shipping: this.getShipping(),
-      promoCode: this.getPromoCode(),
+      promo: this.getPromo(),
+      canBuy: this.getStatusPay(),
       subTotal: this.getSubTotal(),
       totalCost: this.totalCost(),
       items: items
@@ -184,6 +205,8 @@ angular.module('zlCart', ['zlCart.directives'])
     var _self = this;
     _self.init();
     _self.$cart.shipping = storedCart.shipping;
+    _self.$cart.promo = storedCart.promo;
+    _self.$cart.canBuy = storedCart.canBuy;
 
     angular.forEach(storedCart.items, function(item) {
       _self.$cart.items.push(new zlCartItem(item._id, item._name, item._price, item._tax, item._quantity, item._discount, item._data));
@@ -358,8 +381,12 @@ angular.module('zlCart', ['zlCart.directives'])
 
 .service('zlCartDiscount', ['$rootScope', 'zlCart', '$http', '$q', function($rootScope, zlCart, $http, $q) {
   this.init = function() {
-    this.urlDiscount = "/api/getdiscount/";
+    this.urlDiscount = null;
   };
+
+  this.canApplyDiscount = function() {
+    return (typeof this.urlDiscount !== 'undefined');
+  }
 
   this.setUrlDiscount = function(url) {
     this.urlDiscount = url;
@@ -369,18 +396,21 @@ angular.module('zlCart', ['zlCart.directives'])
     return this.urlDiscount;
   };
 
-  this.setDiscount = function(code, callback) {
+  this.setDiscount = function(code, restore, callback) {
     var cart = zlCart.getCart();
     $http.post(this.getUrlDiscount() + code, {
       cart: cart
     }).then(function(response) {
       if (response.data) {
-        zlCart.setPromoCode(code);
-        zlCart.$restore(angular.fromJson(response.data));
+        //zlCart.setPromo(response.data.promo);
+        if (restore) { zlCart.$restore(angular.fromJson(response.data)); };
+        zlCart.setStatusPay(true);
       }
       callback();
-    }).catch(function(error) {
-      callback(error);
+    }).catch(function(response) {
+      if (restore) { zlCart.$restore(angular.fromJson(response.data.cart)); };
+      zlCart.setStatusPay(false);
+      callback(response.data.error);
     });
   };
 }])
@@ -389,7 +419,8 @@ angular.module('zlCart', ['zlCart.directives'])
   $scope.zlCart = zlCart;
 }])
 
-.value('version', '1.0.15');;'use strict';
+.value('version', '1.0.16');;//ZLCART.DIRECTIVES.JS
+'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
 
@@ -397,7 +428,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
   $scope.zlCart = zlCart;
 }])
 
-.directive('zlcartAddtocart', ['zlCart', function(zlCart) {
+.directive('zlcartAddtocart', ['zlCart', 'zlCartDiscount', function(zlCart, zlCartDiscount) {
   return {
     restrict: 'E',
     controller: 'zlCartController',
@@ -490,11 +521,13 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       }
     },
     link: function(scope, element, attrs) {
+      var inProcess = false;
+
       function init() {
         var flags = [];
         var taxOut = [];
         var total = 0;
-        angular.forEach(zlCart.getCart().items, function(item) {
+        angular.forEach(zlCart.getItems(), function(item) {
           var taxRate = item.getTax();
           var taxTotal = item.getTotalWithDiscount();
           var taxValue = +parseFloat(taxTotal / 100 * taxRate).toFixed(2);
@@ -519,16 +552,21 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
 
         scope.taxsRate = taxOut;
         scope.taxTotal = total;
+        inProcess = false;
       }
-      scope.$on("zlCart:change", function() {
-        init();
-      });
       init();
+
+      scope.$on("zlCart:change", function() {
+        if (!inProcess) {
+          inProcess = true;
+          init();
+        }
+      });
     }
   };
 }])
 
-.directive('zlcartDiscount', ['zlCartDiscount', function(zlCartDiscount) {
+.directive('zlcartDiscount', ['zlCart', 'zlCartDiscount', function(zlCart, zlCartDiscount) {
   return {
     restrict: 'E',
     controller: 'zlCartController',
@@ -545,28 +583,43 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
     link: function(scope, element, attrs) {
       scope.attrs = attrs;
       scope.message = {};
-      if (scope.zlCart.getPromoCode()) {
-        scope.code = scope.zlCart.getPromoCode();
+      if (zlCart.getPromo()) {
+        scope.code = zlCart.getPromo().code;
       }
       scope.$watch('code', function(newValue, oldValue) {
         if (newValue !== oldValue) scope.message = {};
       });
 
+      scope.removeCodeDiscount = function(code) {
+        zlCart.setPromo(null);
+      };
+
       scope.setCodeDiscount = function(code) {
-        zlCartDiscount.setDiscount(code, function(err) {
+        zlCartDiscount.setDiscount(code, true, function(err) {
           scope.message.msg = true;
           if (err) {
             scope.message.success = false;
-            scope.message.text = err.data;
+            scope.message.text = err;
             return;
           }
 
           scope.message.success = true;
           scope.message.text = 'Código consumido com sucesso.';
-
-          scope.code = "";
+          scope.code = zlCart.getPromo().code;
+          var myVar = setTimeout(function() {
+            scope.message.msg = false;
+            scope.$apply();
+            clearInterval(myVar);
+          }, 2500);
         });
       };
+
+      scope.$on("zlCart:change", function() {
+        var promo = zlCart.getPromo();
+        if (typeof promo === 'object') {
+          zlCartDiscount.setDiscount(promo.code, false, function(err) {});
+        }
+      });
     }
   };
 }])
@@ -609,30 +662,31 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       }
     }])
   };
-}]);;angular.module('zlCart.fulfilment', [])
+}]);;//ZLCART.FULFILMENT.JS
+angular.module('zlCart.fulfilment', [])
 
-.service('fulfilmentProvider', ['$injector', function ($injector) {
+.service('fulfilmentProvider', ['$injector', function($injector) {
   this._obj = {
     service: undefined,
     settings: undefined
   };
 
-  this.setService = function (service) {
+  this.setService = function(service) {
     this._obj.service = service;
   };
 
-  this.setSettings = function (settings) {
+  this.setSettings = function(settings) {
     this._obj.settings = settings;
   };
 
-  this.checkout = function () {
+  this.checkout = function() {
     var provider = $injector.get('zlCart.fulfilment.' + this._obj.service);
     return provider.checkout(this._obj.settings);
   }
 }])
 
-.service('zlCart.fulfilment.log', ['$q', '$log', 'zlCart', function ($q, $log, zlCart) {
-  this.checkout = function () {
+.service('zlCart.fulfilment.log', ['$q', '$log', 'zlCart', function($q, $log, zlCart) {
+  this.checkout = function() {
     var deferred = $q.defer();
     $log.info(zlCart.toObject());
     deferred.resolve({
@@ -642,8 +696,8 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
   }
 }])
 
-.service('zlCart.fulfilment.http', ['$http', 'zlCart', function ($http, zlCart) {
-  this.checkout = function (settings) {
+.service('zlCart.fulfilment.http', ['$http', 'zlCart', function($http, zlCart) {
+  this.checkout = function(settings) {
     return $http.post(settings.url, {
       data: zlCart.toObject(),
       options: settings.options
@@ -651,13 +705,12 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
   }
 }])
 
-.service('zlCart.fulfilment.meowallet', ['$http', 'zlCart', function ($http, zlCart) {
-  this.checkout = function (settings) {
+.service('zlCart.fulfilment.meowallet', ['$http', 'zlCart', function($http, zlCart) {
+  this.checkout = function(settings) {
     return $http.post(settings.url, {
       data: zlCart.toObject()
     });
   }
 }])
 
-.service('zlCart.fulfilment.paypal', ['$http', 'zlCart', function ($http, zlCart) {
-}]);
+.service('zlCart.fulfilment.paypal', ['$http', 'zlCart', function($http, zlCart) {}]);
