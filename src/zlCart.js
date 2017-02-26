@@ -199,10 +199,12 @@ angular.module('zlCart', ['zlCart.directives'])
       shipping: this.getShipping,
       promo: this.getPromo,
       canBuy: this.getStatusPay,
-      subTotal: this.getSubTotal,
-      totalCost: this.totalCost,
+      subTotal: this.getSubTotal(),
+      subTotalTax: this.getSubTotal(true),
+      totalCost: this.totalCost(),
+      totalCostTax: this.totalCost(true),
       items: items
-    }
+    };
   };
 
   this.$restore = function(storedCart) {
@@ -345,13 +347,15 @@ angular.module('zlCart', ['zlCart.directives'])
       price: this.getPrice(),
       priceWithTax: this.getPrice(true),
       priceWithDiscount: this.getPriceWithDiscount(),
+      priceWithDiscountTax: this.getPriceWithDiscount(true),
       tax: this.getTax(),
       discount: this.getDiscount(),
       quantity: this.getQuantity(),
       data: this.getData(),
       total: this.getTotal(),
       totalWithTax: this.getTotal(true),
-      totalWithDiscount: this.getTotalWithDiscount()
+      totalWithDiscount: this.getTotalWithDiscount(),
+      totalWithDiscountTax: this.getTotalWithDiscount(true)
     }
   };
   return item;
@@ -419,4 +423,4 @@ angular.module('zlCart', ['zlCart.directives'])
   $scope.zlCart = zlCart;
 }])
 
-.value('version', '1.0.18');
+.value('version', '1.0.19');
