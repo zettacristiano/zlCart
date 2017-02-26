@@ -60,7 +60,7 @@ angular.module('zlCart', ['zlCart.directives'])
   this.getItemByRegex = function(expression) {
     var items = this.getCart().items;
     var build = false;
-    var exp = new RegExp(expression, "g");
+    var exp = new RegExp(expression, "ig");
     angular.forEach(items, function(item) {
       if (exp.test(item.getId())) {
         build = item;
@@ -200,7 +200,7 @@ angular.module('zlCart', ['zlCart.directives'])
       promo: this.getPromo,
       canBuy: this.getStatusPay,
       subTotal: this.getSubTotal,
-      totalCost: this.totalCost(tax),
+      totalCost: this.totalCost,
       items: items
     }
   };
@@ -419,7 +419,7 @@ angular.module('zlCart', ['zlCart.directives'])
   $scope.zlCart = zlCart;
 }])
 
-.value('version', '1.0.17');;//ZLCART.DIRECTIVES.JS
+.value('version', '1.0.18');;//ZLCART.DIRECTIVES.JS
 'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
