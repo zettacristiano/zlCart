@@ -1,12 +1,12 @@
-<div class="zlCart discount" ng-hide="zlCart.isEmpty()">
-  <div class="input-group">
-    <input type="text" ng-model="code" class="form-control" ng-disabled="zlCart.getPromoCode()" placeholder="Code...">
-    <div class="input-group-btn">
-      <button ng-hide="zlCart.getPromoCode()" class="btn btn-default" type="button" ng-click="setCodeDiscount(code)">Aplicar</button>
-      <button ng-show="zlCart.getPromoCode()" class="btn btn-default" type="button" ng-click="removeCodeDiscount(code)">Remover</button>
-    </div>
+<div class="shopping-discount" ng-hide="zlCart.isEmpty()">
+  <div class="input-group input-group-lg">
+    <input type="text" ng-model="code" class="form-control" ng-disabled="zlCart.getPromo().code" placeholder="Ative o seu código">
+    <span class="input-group-btn">
+      <button ng-hide="zlCart.getPromo().code" class="btn btn-default" type="button" ng-click="setCodeDiscount(code)">Ativar código</button>
+      <button ng-show="zlCart.getPromo().code" class="btn btn-default" type="button" ng-click="removeCodeDiscount()">Remover</button>
+    </span>
   </div>
-  <div class="alert alert-success" ng-class="{'alert-success':message.success,'alert-success':!message.success}">
+  <div ng-show="message.msg" class="alert" ng-class="{'alert-success':message.success,'alert-danger':!message.success}">
     {{message.text}}
   </div>
 </div>

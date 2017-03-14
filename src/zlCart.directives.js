@@ -111,39 +111,44 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         var flags = [];
         var taxOut = [];
         var total = 0;
+        var totalIva = 0;
         angular.forEach(zlCart.getItems(), function(item) {
-          var taxRate = item.getTax();
-          var taxPrice = +(item.getPriceWithDiscount().toFixed(2));
-          var taxPriceTax = +(item.getPriceWithDiscount(true).toFixed(2));
-          var taxValue = +((taxPriceTax - taxPrice).toFixed(2));
-          if (!flags[taxRate]) {
-            flags[taxRate] = true;
+          var rate = item.getTax();
+          var taxValue = item.getTotalWithTax() - item.getTotal();
+          var taxPrice = item.getTotal();
+          var taxPriceTax = +(taxValue + taxPrice);
+          if (!flags[rate]) {
+            flags[rate] = true;
             taxOut.push({
-              rate: taxRate,
+              rate: rate,
               tax: taxValue,
               value: taxPrice,
               subTotal: taxPriceTax
             });
           } else {
             for (var x = 0; x < taxOut.length; x++) {
-              if (taxOut[x].rate !== taxRate) continue;
+              if (taxOut[x].rate !== rate) { continue; }
               taxOut[x].tax += taxValue;
               taxOut[x].value += taxPrice;
               taxOut[x].subTotal += taxPriceTax;
             }
           }
+          total += taxPriceTax;
+          totalIva += taxValue;
         });
-        taxOut.forEach(function(item) {
+        /*taxOut.forEach(function(item) {
           total += item.subTotal;
-        })
+          totalIva += item;
+        });*/
 
         scope.taxsRate = taxOut;
+        scope.taxTotalIva = totalIva;
         scope.taxTotal = total;
         inProcess = false;
       }
       init();
 
-      scope.$on("zlCart:change", function() {
+      scope.$on("zlCart:change", function(event, args) {
         if (!inProcess) {
           inProcess = true;
           init();
@@ -191,20 +196,24 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
           }
 
           scope.message.success = true;
-          scope.message.text = 'Código consumido com sucesso.';
-          scope.code = zlCart.getPromo().code;
-          var myVar = setTimeout(function() {
+          scope.message.text = 'Código aplicado com sucesso.';
+          var tmpCode = zlCart.getPromo() || {};
+          scope.code = tmpCode.code;
+          zlCart.getItems().forEach(function(item) {
+            item.setPromo(tmpCode);
+          });
+          setTimeout(function() {
             scope.message.msg = false;
             scope.$apply();
-            clearInterval(myVar);
           }, 2500);
         });
       };
 
-      scope.$on("zlCart:change", function() {
+      scope.$on("zlCart:itemAdded", function(newItem) {
         var promo = zlCart.getPromo();
         if (typeof promo === 'object') {
-          zlCartDiscount.setDiscount(promo.code, false, function(err) {});
+          zlCart.getItemById(newItem.id).setPromo(promo);
+          //zlCartDiscount.setDiscount(promo.code, false, function(err) {});
         }
       });
     }
@@ -214,10 +223,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
 .directive('zlcartCheckout', [function() {
   return {
     restrict: 'E',
-    scope: {
-      service: '@',
-      settings: '='
-    },
+    scope: { service: '@', settings: '=' },
     transclude: true,
     replace: false,
     templateUrl: function(element, attrs) {
@@ -233,20 +239,18 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       $scope.checkout = function() {
         fulfilmentProvider.setService($scope.service);
         fulfilmentProvider.setSettings($scope.settings);
-        fulfilmentProvider.checkout()
-          .then(function(response) {
-            if ($scope.service === 'meowallet') {
-              $window.location.href = response.data.url_redirect;
-            }
-            $rootScope.$broadcast('zlCart:checkout_succeeded', data);
-          })
-          .catch(function(response) {
-            $rootScope.$broadcast('zlCart:checkout_failed', {
-              statusCode: response.status,
-              error: response.data
-            });
+        fulfilmentProvider.checkout().then(function(response) {
+          /*if ($scope.service === 'meowallet') { // MOVE TO res.redirect(cart.url_redirect);
+            $window.location.href = response.data.url_redirect;
+          }*/
+          $rootScope.$broadcast('zlCart:checkout_succeeded', data);
+        }).catch(function(response) {
+          $rootScope.$broadcast('zlCart:checkout_failed', {
+            statusCode: response.status,
+            error: response.data
           });
-      }
+        });
+      };
     }])
   };
 }]);

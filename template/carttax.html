@@ -1,25 +1,35 @@
-<table class="table table-hover zlCart tax" ng-hide="zlCart.isEmpty()">
-  <thead>
-    <tr>
-      <th class="text-right">Tipo</th>
-      <th class="text-right">Valor</th>
-      <th class="text-right">Iva</th>
-      <th class="text-right">Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr ng-repeat="tax in taxsRate track by $index">
-      <td class="num text-right">{{ tax.rate }}%</td>
-      <td class="num text-right">{{ tax.value - tax.tax | currency }}</td>
-      <td class="num text-right">{{ tax.tax | currency }}</td>
-      <td class="num text-right">{{ tax.value | currency }}</td>
-    </tr>
-  </tbody>
-  <tfoot>
-    <tr>
-      <td colspan="2"></td>
-      <td class="text-right"><strong>Total</strong></td>
-      <td class="num text-right">{{ taxTotal | currency }}</td>
-    </tr>
-  </tfoot>
-</table>
+<div class="row">
+  <div class="shopping-tax col-sm-7 col-md-8">
+    <div class="table-responsive">
+      <table class="table table-hover zlCart tax" ng-hide="zlCart.isEmpty()">
+        <thead>
+          <tr>
+            <th colspan="4"><strong>Resumo do IVA Faturado</strong></th>
+          </tr>
+          <tr>
+            <th class="text-right">IVA</th>
+            <th class="text-right">Base</th>
+            <th class="text-right">Valor do Iva</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="tax in taxsRate track by $index">
+            <td class="num text-right">{{ tax.rate }}%</td>
+            <td class="num text-right">{{ tax.value | currency }}</td>
+            <td class="num text-right">{{ tax.tax | currency }}</td>
+            <td class="num text-right">{{ tax.value+tax.tax | currency }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <td class="text-right"><strong>Total</strong></td>
+            <td class="num text-right"><strong>{{ taxTotalIva | currency }}</strong></td>
+            <td class="num text-right"><strong>{{ taxTotal | currency }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

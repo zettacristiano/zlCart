@@ -1,51 +1,61 @@
-<div class="zlCart cart">
-  <div class="alert alert-warning" role="alert" ng-show="zlCart.isEmpty()">
-    Your cart is empty
+<div class="shopping-cart">
+  <div class="shopping-empty" role="alert" ng-show="zlCart.isEmpty()">
+    Ainda não tem compras
   </div>
-  <div class="table-responsive col-lg-12" ng-hide="zlCart.isEmpty()">
-    <table class="table table-striped zlCart cart">
+  <div class="table-responsive" ng-hide="zlCart.isEmpty()">
+    <table class="table table-hover zlCart cart">
       <thead>
         <tr>
           <th></th>
           <th></th>
-          <th>Quantity</th>
-          <th>Amount</th>
-          <th>Total</th>
+          <th class="text-center">Quantidade</th>
+          <th>Valor S/ IVA</th>
+          <th ng-show="zlCart.getPromo()">Desconto</th>
+          <th ng-show="zlCart.getPromo()">Valor Desconto</th>
+          <th>Taxa Iva</th>
+          <th>Valor Iva</th>
+          <th>Valor C/ IVA</th>
         </tr>
       </thead>
-      <tfoot>
-        <tr ng-repeat="tax in zlCart.getTax()">
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>Tax ({{ tax.rate }}%):</td>
-          <td>{{ tax.value | currency }}</td>
-        </tr>
-        <tr ng-show="zlCart.getShipping()">
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>Shipping:</td>
-          <td>{{ zlCart.getShipping() | currency }}</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>Total:</td>
-          <td>{{ zlCart.totalCost() | currency }}</td>
-        </tr>
-      </tfoot>
       <tbody>
         <tr ng-repeat="item in zlCart.getCart().items track by $index">
-          <td><span ng-click="zlCart.removeItemById(item.getId())" class="glyphicon glyphicon-remove"></span></td>
+          <td><i ng-click="zlCart.removeItemById(item.getId())" class="fa fa-remove" data-toggle="tooltip" data-placement="top" title="remover item"></i></td>
           <td>{{ item.getName() }}</td>
-          <td><span class="glyphicon glyphicon-minus" ng-class="{'disabled':item.getQuantity()==1}" ng-click="item.setQuantity(-1, true)"></span>&nbsp;&nbsp; {{ item.getQuantity() | number }}&nbsp;&nbsp;
-            <span class="glyphicon glyphicon-plus" ng-click="item.setQuantity(1, true)"></span></td>
-          <td>{{ item.getPrice() | currency}}</td>
-          <td>{{ item.getTotal() | currency }}</td>
+          <td class="text-center" style="white-space: nowrap">
+            <span class="fa fa-minus green" ng-class="{'disabled':item.getQuantity()==1}" ng-click="item.setQuantity(-1, true)"></span>
+            <span class="num" style="padding:0 10px;"><strong>{{ item.getQuantity() | number }}</strong></span>
+            <i class="fa fa-plus green" ng-click="item.setQuantity(1, true)"></i>
+          </td>
+          <td class="num">{{ item.getTotal() | currency}}</td>
+          <td ng-show="item.getPromo().symbol==='%'" class="num">{{ item.getPromo().value }}%</td>
+          <td ng-show="item.getPromo().symbol==='€'" class="num">{{ item.getPromo().value | currency}}</td>
+          <td ng-show="item.getPromo()" class="num">{{ item.getTotalDiscount() | currency}}</td>
+          <td class="num">{{ item.getTax()}}%</td>
+          <td class="num"><strong>{{ item.getTotalWithTax()-item.getTotal() | currency }}</strong></td>
+          <td class="num">{{ item.getTotalWithTax() | currency}}</td>
+        </tr>
+        <tr>
+          <td colspan="3">Totais</td>
+          <td class="num">{{ zlCart.getSubTotal() | currency}}</td>
+          <td ng-show="zlCart.getPromo()"></td>
+          <td ng-show="zlCart.getPromo()" class="num">{{ zlCart.getTotalDiscount() | currency}}</td>
+          <td class="num"></td>
+          <td class="num"><strong>{{ zlCart.getSubTotalWithTax()-zlCart.getSubTotal() | currency }}</strong></td>
+          <td class="num">{{ zlCart.getSubTotalWithTax() | currency}}</td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr ng-show="zlCart.getShipping()">
+          <td colspan="{{zlCart.getPromo() ? 6 : 4}}" class="no-border"></td>
+          <td colspan="2" class="text-right">Transporte:</td>
+          <td class="num text-right"><strong>{{ zlCart.getShipping() | currency }}</strong></td>
+        </tr>
+        <tr>
+          <td colspan="{{zlCart.getPromo() ? 6 : 4}}" class="no-border"></td>
+          <td colspan="2" class="text-right"><strong>Valor a Pagar</strong></td>
+          <td class="num fontbig text-right"><strong>{{ zlCart.totalCost() | currency }}</strong></td>
+        </tr>
+      </tfoot>
     </table>
   </div>
 </div>

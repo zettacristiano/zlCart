@@ -3,12 +3,13 @@
   "description": "Shopping Cart built for AngularJS",
   "keywords": ["AngularJS", "module", "directive", "shopping cart", "e-commerce", "cart", "basket", "shopping"],
   "authors": [],
-  "version": "1.0.19",
+  "version": "1.0.20",
   "homepage": "",
   "license": "MIT",
   "main": "dist/zl-cart.js",
   "dependencies": {
-    "angular": ">=1.6.x"
+    "angular": ">=1.6.x",
+    "angular-local-storage": "^0.5.2"
   },
   "devDependencies": {
     "angular-mocks": ">=1.6.x"
