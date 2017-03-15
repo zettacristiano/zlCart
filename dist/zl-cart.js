@@ -194,7 +194,6 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     return {
       shipping: this.getShipping(),
       promo: this.getPromo(),
-      canBuy: this.getStatusPay(),
       subTotal: this.getSubTotal(),
       subTotalWithTax: this.getSubTotalWithTax(),
       totalDiscount: this.getTotalDiscount(),
