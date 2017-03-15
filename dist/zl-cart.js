@@ -77,7 +77,7 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     angular.forEach(items, function(item) {
       if (objPromo) {
         var isChecked = objPromo.products.some(function(element, index, array) {
-          return element._id === item.getId() && element.check;
+          return element.productId === item.getId() && element.check;
         });
         if (isChecked) { item.setPromo(objPromo); }
       } else {
