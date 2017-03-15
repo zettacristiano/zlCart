@@ -329,9 +329,6 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     quantityToDiscount = quantity - (quantity % parcial);
 
     if (promo.symbol === "%") { total = valDiscount * quantityToDiscount; } else { total = valDiscount * (quantityToDiscount / parcial); }
-    //valDiscount = (quantityToDiscount / parcial * valDiscount) || valDiscount;
-    //total = (price * quantityToDiscount) - (price * quantityToDiscount - valDiscount);
-
     return +parseFloat(total).toFixed(2);
   };
   item.prototype.getTotal = function() {
@@ -400,11 +397,9 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     $http.post(this.getUrlDiscount() + code, { cart: cart }).then(function(response) {
       if (response.data) {
         zlCart.setPromo(response.data);
-        //if (restore) { zlCart.$restore(angular.fromJson(response.data)); };
       }
       callback();
     }).catch(function(response) {
-      //if (restore) { zlCart.$restore(angular.fromJson(response.data.cart)); };
       callback(response.data.error);
     });
   };

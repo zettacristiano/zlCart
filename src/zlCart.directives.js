@@ -136,10 +136,6 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
           total += taxPriceTax;
           totalIva += taxValue;
         });
-        /*taxOut.forEach(function(item) {
-          total += item.subTotal;
-          totalIva += item;
-        });*/
 
         scope.taxsRate = taxOut;
         scope.taxTotalIva = totalIva;
@@ -213,7 +209,6 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         var promo = zlCart.getPromo();
         if (typeof promo === 'object') {
           zlCart.getItemById(newItem.id).setPromo(promo);
-          //zlCartDiscount.setDiscount(promo.code, false, function(err) {});
         }
       });
     }
@@ -240,9 +235,6 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         fulfilmentProvider.setService($scope.service);
         fulfilmentProvider.setSettings($scope.settings);
         fulfilmentProvider.checkout().then(function(response) {
-          /*if ($scope.service === 'meowallet') { // MOVE TO res.redirect(cart.url_redirect);
-            $window.location.href = response.data.url_redirect;
-          }*/
           $rootScope.$broadcast('zlCart:checkout_succeeded', data);
         }).catch(function(response) {
           $rootScope.$broadcast('zlCart:checkout_failed', {

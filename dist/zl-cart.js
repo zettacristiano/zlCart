@@ -329,9 +329,6 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     quantityToDiscount = quantity - (quantity % parcial);
 
     if (promo.symbol === "%") { total = valDiscount * quantityToDiscount; } else { total = valDiscount * (quantityToDiscount / parcial); }
-    //valDiscount = (quantityToDiscount / parcial * valDiscount) || valDiscount;
-    //total = (price * quantityToDiscount) - (price * quantityToDiscount - valDiscount);
-
     return +parseFloat(total).toFixed(2);
   };
   item.prototype.getTotal = function() {
@@ -400,11 +397,9 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     $http.post(this.getUrlDiscount() + code, { cart: cart }).then(function(response) {
       if (response.data) {
         zlCart.setPromo(response.data);
-        //if (restore) { zlCart.$restore(angular.fromJson(response.data)); };
       }
       callback();
     }).catch(function(response) {
-      //if (restore) { zlCart.$restore(angular.fromJson(response.data.cart)); };
       callback(response.data.error);
     });
   };
@@ -552,10 +547,6 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
           total += taxPriceTax;
           totalIva += taxValue;
         });
-        /*taxOut.forEach(function(item) {
-          total += item.subTotal;
-          totalIva += item;
-        });*/
 
         scope.taxsRate = taxOut;
         scope.taxTotalIva = totalIva;
@@ -629,7 +620,6 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         var promo = zlCart.getPromo();
         if (typeof promo === 'object') {
           zlCart.getItemById(newItem.id).setPromo(promo);
-          //zlCartDiscount.setDiscount(promo.code, false, function(err) {});
         }
       });
     }
@@ -656,9 +646,6 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         fulfilmentProvider.setService($scope.service);
         fulfilmentProvider.setSettings($scope.settings);
         fulfilmentProvider.checkout().then(function(response) {
-          /*if ($scope.service === 'meowallet') { // MOVE TO res.redirect(cart.url_redirect);
-            $window.location.href = response.data.url_redirect;
-          }*/
           $rootScope.$broadcast('zlCart:checkout_succeeded', data);
         }).catch(function(response) {
           $rootScope.$broadcast('zlCart:checkout_failed', {
