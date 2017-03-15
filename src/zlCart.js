@@ -408,4 +408,4 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
   $scope.zlCart = zlCart;
 }])
 
-.value('version', '1.0.20');
+.value('version', '1.0.21');

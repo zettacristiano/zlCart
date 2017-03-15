@@ -235,6 +235,9 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
         fulfilmentProvider.setService($scope.service);
         fulfilmentProvider.setSettings($scope.settings);
         fulfilmentProvider.checkout().then(function(response) {
+          if (response.data.url_redirect) {
+            $window.location.href = response.data.url_redirect;
+          }
           $rootScope.$broadcast('zlCart:checkout_succeeded', data);
         }).catch(function(response) {
           $rootScope.$broadcast('zlCart:checkout_failed', {
