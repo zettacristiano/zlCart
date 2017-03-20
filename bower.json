@@ -1,9 +1,18 @@
 {
   "name": "zl-cart",
   "description": "Shopping Cart built for AngularJS",
-  "keywords": ["AngularJS", "module", "directive", "shopping cart", "e-commerce", "cart", "basket", "shopping"],
+  "keywords": [
+    "AngularJS",
+    "module",
+    "directive",
+    "shopping cart",
+    "e-commerce",
+    "cart",
+    "basket",
+    "shopping"
+  ],
   "authors": [],
-  "version": "1.0.21",
+  "version": "1.0.22",
   "homepage": "",
   "license": "MIT",
   "main": "dist/zl-cart.js",
