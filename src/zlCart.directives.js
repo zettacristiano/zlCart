@@ -183,7 +183,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       };
 
       scope.setCodeDiscount = function(code) {
-        zlCartDiscount.setDiscount(code, true, function(err) {
+        zlCartDiscount.setDiscount(code, function(err) {
           scope.message.msg = true;
           if (err) {
             scope.message.success = false;
@@ -193,11 +193,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
 
           scope.message.success = true;
           scope.message.text = 'Código aplicado com sucesso.';
-          var tmpCode = zlCart.getPromo() || {};
-          scope.code = tmpCode.code;
-          zlCart.getItems().forEach(function(item) {
-            item.setPromo(tmpCode);
-          });
+          scope.code = (zlCart.getPromo() || {}).code;
           setTimeout(function() {
             scope.message.msg = false;
             scope.$apply();
@@ -206,10 +202,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
       };
 
       scope.$on("zlCart:itemAdded", function(newItem) {
-        var promo = zlCart.getPromo();
-        if (typeof promo === 'object') {
-          zlCart.getItemById(newItem.id).setPromo(promo);
-        }
+        zlCart.setPromo(zlCart.getPromo());
       });
     }
   };
