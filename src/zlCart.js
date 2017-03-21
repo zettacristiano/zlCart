@@ -150,7 +150,7 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     if (!promo || items.length === 0) return 0;
     var total = 0;
     angular.forEach(items, function(item) {
-      total += item.getTotalDiscount();
+      total += +item.getTotalDiscount();
     });
     return +parseFloat(total).toFixed(2);
   };
@@ -331,7 +331,7 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     return +parseFloat(total).toFixed(2);
   };
   item.prototype.getTotal = function() {
-    return +parseFloat(this.getPrice() * this.getQuantity() - this.getTotalDiscount()).toFixed(2);
+    return +parseFloat(+this.getPrice() * +this.getQuantity() - +this.getTotalDiscount()).toFixed(2);
   };
   item.prototype.getTotalWithTax = function() {
     return +parseFloat(this.getTotal() + (this.getTotal() * this.getTax() / 100)).toFixed(2);
@@ -409,4 +409,4 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
   $scope.zlCart = zlCart;
 }])
 
-.value('version', '1.0.23');
+.value('version', '1.0.24');

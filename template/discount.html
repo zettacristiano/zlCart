@@ -6,6 +6,7 @@
       <button ng-show="zlCart.getPromo().code" class="btn btn-default" type="button" ng-click="removeCodeDiscount()">Remover</button>
     </span>
   </div>
+  <div ng-show="zlCart.getPromo().code"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i><small> <strong>Condições da campanha:</strong> {{zlCart.getPromo().description}}</small></div>
   <div ng-show="message.msg" class="alert" ng-class="{'alert-success':message.success,'alert-danger':!message.success}">
     {{message.text}}
   </div>
