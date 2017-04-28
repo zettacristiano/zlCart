@@ -12,7 +12,7 @@
     "shopping"
   ],
   "authors": [],
-  "version": "1.0.24",
+  "version": "1.0.25",
   "homepage": "",
   "license": "MIT",
   "main": "dist/zl-cart.js",

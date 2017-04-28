@@ -231,6 +231,10 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     this.setData(data);
   };
 
+  item.prototype.round = function(value, decimals) {
+    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+  }
+
   item.prototype.setId = function(id) {
     if (id) this._id = id;
     else {
@@ -405,11 +409,19 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
   };
 }])
 
-.controller('CartController', ['$scope', 'zlCart', function($scope, zlCart) {
-  $scope.zlCart = zlCart;
-}])
+.service('zlCartUtil', function() {
+  this.round = function(value, decimals) {
+    if (decimals === undefined) {
+      decimals = 0;
+    }
 
-.value('version', '1.0.24');;//ZLCART.DIRECTIVES.JS
+    var multiplicator = Math.pow(10, decimals);
+    value = +(parseFloat((value * multiplicator).toFixed(11))).toFixed(1);
+    return (Math.round(value) / multiplicator).toFixed(2);
+  };
+})
+
+.value('version', '1.0.25');;//ZLCART.DIRECTIVES.JS
 'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
