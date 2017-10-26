@@ -1,6 +1,6 @@
 {
   "name": "zl-cart",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "license": "MIT",
   "author": "",
   "devDependencies": {
@@ -14,9 +14,7 @@
     "grunt-karma": "^2.0.0",
     "gulp": "~3.9.1",
     "gulp-less": "^3.3.2",
-    "gulp-watch": "~4.3.11"
-  },
-  "dependencies": {
+    "gulp-watch": "~4.3.11",
     "karma": "^1.7.1"
   }
 }

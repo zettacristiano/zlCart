@@ -178,6 +178,7 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
 
   this.empty = function() {
     this.$cart.items = [];
+    zlCart.setPromo(null);                
     $rootScope.$broadcast('zlCart:change', {});
   };
   this.isEmpty = function() {
@@ -643,8 +644,8 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
           fulfilmentProvider.checkout().then(function (response) {
             if (response.data.url_redirect) {
               $location.path(response.data.url_redirect);
-              $route.reload();
             }
+            zlCart.empty();            
             $rootScope.$broadcast('zlCart:checkout_succeeded', data);
           }).catch(function (response) {
             $rootScope.$broadcast('zlCart:checkout_failed', {
