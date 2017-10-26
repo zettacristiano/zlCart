@@ -215,7 +215,7 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
           return attrs.templateUrl;
         }
       },
-      controller: ('zlCartController', ['$rootScope', '$scope', '$window', 'zlCart', 'fulfilmentProvider', function ($rootScope, $scope, $window, zlCart, fulfilmentProvider) {
+      controller: ('zlCartController', ['$rootScope', '$scope', '$location', '$route', 'zlCart', 'fulfilmentProvider', function ($rootScope, $scope, $location, $route, zlCart, fulfilmentProvider) {
         $scope.zlCart = zlCart;
 
         $scope.checkout = function () {
@@ -223,7 +223,8 @@ angular.module('zlCart.directives', ['zlCart.fulfilment'])
           fulfilmentProvider.setSettings($scope.settings);
           fulfilmentProvider.checkout().then(function (response) {
             if (response.data.url_redirect) {
-              $window.location.href = response.data.url_redirect;
+              $location.path(response.data.url_redirect);
+              $route.reload();
             }
             $rootScope.$broadcast('zlCart:checkout_succeeded', data);
           }).catch(function (response) {
