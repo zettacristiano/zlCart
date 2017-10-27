@@ -178,7 +178,7 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
 
     this.empty = function () {
       this.$cart.items = [];
-      this.promo = null;
+      this.$cart.promo = null;
       $rootScope.$broadcast('zlCart:change', {});
     };
     this.isEmpty = function () {
@@ -418,4 +418,4 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     };
   })
 
-  .value('version', '1.0.28');
+  .value('version', '1.0.29');
