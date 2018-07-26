@@ -1,6 +1,6 @@
 {
   "name": "zl-cart",
-  "version": "1.0.32",
+  "version": "1.0.33",
   "license": "MIT",
   "author": "",
   "keywords": [
@@ -14,11 +14,11 @@
     "shopping"
   ],
   "dependencies": {
-    "angular": "^1.7.2",
+    "angular": "1.6.10",
     "angular-local-storage": "^0.7.1"
   },
   "devDependencies": {
-    "angular-mocks": "^1.7.2",
+    "angular-mocks": "1.6.10",
     "grunt": "~1.0.3",
     "grunt-concat-css": "^0.3.2",
     "grunt-contrib-concat": "~1.0.1",

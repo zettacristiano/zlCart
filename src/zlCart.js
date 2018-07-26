@@ -418,4 +418,4 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     };
   })
 
-  .value('version', '1.0.32');
+  .value('version', '1.0.33');
