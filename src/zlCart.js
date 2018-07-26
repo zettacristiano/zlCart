@@ -288,7 +288,7 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     item.prototype.setQuantity = function (quantity, relative) {
       var quantityInt = parseInt(quantity);
       if (quantityInt % 1 === 0) {
-        if (relative === true) {
+        if (relative == true) {
           this._quantity += quantityInt;
         } else {
           this._quantity = quantityInt;
@@ -418,4 +418,4 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     };
   })
 
-  .value('version', '1.0.30');
+  .value('version', '1.0.31');
