@@ -35,10 +35,10 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
       };
     };
 
-    this.addItem = function (id, name, price, tax, quantity, discount, data) {
+    this.addItem = function (id, name, price, tax, quantity, discount, data, relative) {
       var inCart = this.getItemById(id);
       if (typeof inCart === 'object') {
-        inCart.setQuantity(quantity); //Update quantity of an item if it's already in the cart
+        inCart.setQuantity(quantity, relative); //Update quantity of an item if it's already in the cart
       } else {
         price = +zlCartUtil.round(this.getTaxIncluded() ? (+price / (1 + (+tax / 100))) : +price, 2);
         var newItem = new zlCartItem(id, name, price, tax, quantity, discount, this.getPromo(), data);
@@ -418,7 +418,7 @@ angular.module('zlCart', ['zlCart.directives', 'LocalStorageModule'])
     };
   })
 
-  .value('version', '1.0.33');;//ZLCART.DIRECTIVES.JS
+  .value('version', '1.0.34');;//ZLCART.DIRECTIVES.JS
 'use strict';
 
 angular.module('zlCart.directives', ['zlCart.fulfilment'])
