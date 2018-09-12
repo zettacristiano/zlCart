@@ -1,6 +1,6 @@
 {
   "name": "zl-cart",
-  "version": "1.0.34",
+  "version": "1.0.35",
   "license": "MIT",
   "author": "",
   "keywords": [
@@ -14,22 +14,22 @@
     "shopping"
   ],
   "dependencies": {
-    "angular": "1.6.10",
+    "angular": "1.7.4",
     "angular-local-storage": "^0.7.1"
   },
   "devDependencies": {
-    "angular-mocks": "1.6.10",
+    "angular-mocks": "1.7.4",
     "grunt": "~1.0.3",
     "grunt-concat-css": "^0.3.2",
     "grunt-contrib-concat": "~1.0.1",
     "grunt-contrib-copy": "~1.0.0",
-    "grunt-contrib-cssmin": "^2.2.1",
-    "grunt-contrib-uglify": "~3.3.0",
+    "grunt-contrib-cssmin": "^3.0.0",
+    "grunt-contrib-uglify": "~4.0.0",
     "grunt-contrib-watch": "~1.1.0",
-    "grunt-karma": "^2.0.0",
+    "grunt-karma": "^3.0.0",
     "gulp": "~3.9.1",
     "gulp-less": "^4.0.1",
     "gulp-watch": "~5.0.1",
-    "karma": "^2.0.5"
+    "karma": "^3.0.0"
   }
 }
